@@ -1,0 +1,10 @@
+data/cars
+data/CUB_200_2011
+data/MNIST
+data/cars_annos.mat
+data/car_ims.tar.gz
+data/cifar-10*
+runs/
+__pycache__/
+wandb/
+models/
