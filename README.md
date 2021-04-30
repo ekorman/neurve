@@ -7,6 +7,8 @@ Additionally, we implement a manifold version of triplet training, which will be
 ## Notebooks
 [MSimCLR Inference](https://github.com/ekorman/neurve/blob/master/notebooks/msimclr-inference.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ekorman/neurve/blob/master/notebooks/msimclr-inference.ipynb)
 
+This notebook will run inference using a pre-trained Manifold SimCLR model (trained on either CIFAR10, FashionMNIST, or MNIST).
+
 ## Installation
 
 Install by cloning this repository and then running, from the repo root, the command
