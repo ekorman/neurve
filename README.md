@@ -5,7 +5,7 @@ This is the repository to accompany the paper [*Self-supervised representation l
 Additionally, we implement a manifold version of triplet training, which will be expounded on in an upcoming preprint.
 
 ## Notebooks
-
+[MSimCLR Inference](https://github.com/ekorman/neurve/blob/master/notebooks/msimclr-inference.ipynb) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/ekorman/neurve/blob/master/notebooks/msimclr-inference.ipynb)
 
 ## Installation
 
