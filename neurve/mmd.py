@@ -83,6 +83,39 @@ class MMDManifold:
         return ret
 
 
+class MMDLoss:
+    def __init__(self, kernel, sigma, device):
+        """
+        Parameters
+        ----------
+        kernel : str
+            one of "imq" or "rbf"
+        sigma : float
+        device : str
+        """
+        self.mmd = MMD(kernel=kernel, sigma=sigma)
+        self.device = device
+
+    def __call__(self, X):
+        """
+        Parameters
+        ----------
+        X : torch.Tensor
+            coordinates. should be shape [n, d] (d the dimension of the
+            manifold). Note that X should be the output before the sigmoid activation
+            since the MMD will be computed between the sample X and the inverse
+            sigmoid of a random sample of the uniform distribution on [0, 1]^d
+
+        Returns
+        -------
+        torch.Tensor
+            the MMD loss (a scalar)
+        """
+        return self.mmd(
+            X, sigmoid_inv(torch.rand(X.shape[0], X.shape[1], device=self.device)),
+        )
+
+
 class MMDManifoldLoss:
     def __init__(self, kernel, sigma, device):
         """
