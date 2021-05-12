@@ -72,7 +72,7 @@ if __name__ == "__main__":
     parser.add_argument("--backbone", type=str, default="googlenet")
     parser.add_argument("--data_root", type=str, default="data/CUB_200_2011/images/")
     parser.add_argument("--dim_z", type=int, default=8)
-    parser.add_argument("--eval_freq", type=int, default=20)
+    parser.add_argument("--eval_freq", type=int, default=10)
     parser.add_argument("--lr", type=float, default=0.02)
     parser.add_argument("--label_smoothing", type=float, default=0.1)
     parser.add_argument("--dropout", type=float, default=0.5)
