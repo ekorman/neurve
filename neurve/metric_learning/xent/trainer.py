@@ -75,10 +75,10 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         with torch.no_grad():
             for x, y in tqdm(self.eval_data_loader):
                 if all_emb is None:
-                    all_emb = self.net(x.to(self.device)).cpu()
+                    all_emb = self.net(x.to(self.device))[1].cpu()
                     all_y = y
                 else:
-                    all_emb = torch.cat([all_emb, self.net(x.to(self.device)).cpu()])
+                    all_emb = torch.cat([all_emb, self.net(x.to(self.device))[1].cpu()])
                     all_y = torch.cat([all_y, y])
 
         dists = self.pdist(all_emb).numpy()
