@@ -11,7 +11,6 @@ from neurve.metric_learning.xent import CrossEntropyTrainer, resnet50
 
 def main(
     backbone,
-    dim_z,
     data_root,
     resize_shape,
     lr,
@@ -71,7 +70,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--backbone", type=str, default="googlenet")
     parser.add_argument("--data_root", type=str, default="data/CUB_200_2011/images/")
-    parser.add_argument("--dim_z", type=int, default=8)
     parser.add_argument("--eval_freq", type=int, default=10)
     parser.add_argument("--lr", type=float, default=0.02)
     parser.add_argument("--label_smoothing", type=float, default=0.1)
