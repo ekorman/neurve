@@ -36,6 +36,7 @@ def main(
         val_or_test=val_or_test,
         num_workers=num_workers,
         batch_size=batch_size,
+        method="xent",
     )
 
     net = resnet50(
