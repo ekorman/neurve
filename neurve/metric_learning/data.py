@@ -32,7 +32,7 @@ def xent_transforms(data_root, resize_shape):
         RandomHorizontalFlip(),
         ToTensor(),
     ]
-    val_transforms = [Resize(resize_shape), CenterCrop(224)]
+    val_transforms = [Resize(resize_shape), CenterCrop(224), ToTensor()]
 
     return Compose(train_transforms), Compose(val_transforms)
 
@@ -71,7 +71,7 @@ def get_data_loaders(
     if method == "triplet":
         train_transform, val_transform = triplet_transforms(resize_shape)
     else:
-        train_transform, val_transform = triplet_transforms(data_root, resize_shape)
+        train_transform, val_transform = xent_transforms(data_root, resize_shape)
 
     train_dset = ImageFolder(root=data_root, transform=train_transform)
     val_dset = ImageFolder(root=data_root, transform=val_transform)
@@ -135,7 +135,7 @@ def get_data_loaders(
         assert n_per_class is None
         assert batch_size is not None
         train_data_loader = DataLoader(
-            train_dset, num_workers=num_workers, batch_size=batch_size, drop_last=True,
+            train_dset, num_workers=num_workers, batch_size=batch_size, shuffle=True, drop_last=True,
         )
 
     val_data_loader = DataLoader(

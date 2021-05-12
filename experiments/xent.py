@@ -44,9 +44,12 @@ def main(
         num_classes=len(set(train_data_loader.dataset.targets)),
         num_features=num_features,
         dropout=dropout,
+        set_bn_eval=True,
     )
 
-    opt = SGD(net.parameters(), lr=lr, nesterov=False, weight_decay=5e-4)
+    parameters = [{'params': [par for par in net.parameters() if par.dim() != 1]},
+            {'params': [par for par in net.parameters() if par.dim() == 1], 'weight_decay': 0}]
+    opt = SGD(parameters, lr=lr, nesterov=False, weight_decay=5e-4)
     warm_cosine = lambda i: min(
         (i + 1) / 100,
         (1 + math.cos(math.pi * i / (n_epochs * len(train_data_loader)))) / 2,
