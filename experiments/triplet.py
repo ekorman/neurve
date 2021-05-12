@@ -2,21 +2,10 @@ import argparse
 from copy import copy
 import os
 
-import numpy as np
 from torch import optim
-from torch.utils.data import DataLoader, Subset
-from torchvision.datasets import ImageFolder
-from torchvision.transforms import (
-    ToTensor,
-    Compose,
-    Resize,
-    Normalize,
-    RandomResizedCrop,
-    RandomHorizontalFlip,
-)
 
+from neurve.metric_learning.data import get_data_loaders
 from neurve.metric_learning.models import TorchvisionEmbed, TorchvisionMfldEmbed
-from neurve.samplers import BalancedClassBatchSampler
 from neurve.metric_learning.trainer import (
     ManifoldTripletTrainer,
     TripletTrainer,
@@ -54,75 +43,15 @@ def main(
         # dimension is dim_z + 1 since it gets normalized to the unit sphere
         net = TorchvisionEmbed(backbone, dim_z + 1, pretrained=True)
 
-    train_transform = Compose(
-        [
-            RandomResizedCrop(resize_shape),
-            RandomHorizontalFlip(),
-            ToTensor(),
-            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
-    )
-    val_transform = Compose(
-        [
-            Resize((resize_shape, resize_shape)),
-            ToTensor(),
-            Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
-    )
-
-    train_dset = ImageFolder(root=data_root, transform=train_transform)
-    val_dset = ImageFolder(root=data_root, transform=val_transform)
-    targets = train_dset.targets
-
-    if val_or_test == "val":
-        # take first half for train and val, second half for holdout test
-        train_indices = [
-            i
-            for i in range(len(train_dset))
-            if train_dset.samples[i][1] < 0.8 * len(os.listdir(data_root)) / 2
-        ]
-        val_indices = [
-            i
-            for i in range(len(train_dset))
-            if train_dset.samples[i][1] < len(os.listdir(data_root)) / 2
-            and i not in train_indices
-        ]
-    else:
-        # split classes in half for train and val
-        train_indices = [
-            i
-            for i in range(len(train_dset))
-            if train_dset.samples[i][1] < len(os.listdir(data_root)) / 2
-        ]
-        val_indices = [i for i in range(len(train_dset)) if i not in train_indices]
-
-    train_dset = Subset(train_dset, train_indices)
-    train_dset.targets = [targets[i] for i in train_indices]
-    val_dset = Subset(val_dset, val_indices)
-    val_dset.targets = [targets[i] for i in val_indices]
-
-    if data_root == "data/CUB_200_2011/images/":
-        assert (
-            len(np.unique(train_dset.targets)) + len(np.unique(val_dset.targets)) == 100
-            if val_or_test == "val"
-            else 200
-        )
-    else:
-        assert (
-            len(np.unique(train_dset.targets)) + len(np.unique(val_dset.targets)) == 98
-            if val_or_test == "val"
-            else 196
-        )
-
-    batch_sampler = BalancedClassBatchSampler(train_dset, n_classes, n_per_class)
-
     opt = getattr(optim, opt_name)(params=net.parameters(), lr=lr)
 
-    train_data_loader = DataLoader(
-        train_dset, batch_sampler=batch_sampler, num_workers=num_workers
-    )
-    val_data_loader = DataLoader(
-        val_dset, batch_size=n_classes * n_per_class, num_workers=num_workers
+    train_data_loader, val_data_loader = get_data_loaders(
+        data_root=data_root,
+        resize_shape=resize_shape,
+        val_or_test=val_or_test,
+        num_workers=num_workers,
+        n_classes=n_classes,
+        n_per_class=n_per_class,
     )
 
     if n_charts is not None:

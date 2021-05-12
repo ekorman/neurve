@@ -84,7 +84,7 @@ class MMDManifold:
 
 
 class MMDLoss:
-    def __init__(self, kernel, sigma, device):
+    def __init__(self, kernel, sigma):
         """
         Parameters
         ----------
@@ -94,7 +94,6 @@ class MMDLoss:
         device : str
         """
         self.mmd = MMD(kernel=kernel, sigma=sigma)
-        self.device = device
 
     def __call__(self, X):
         """
@@ -112,7 +111,7 @@ class MMDLoss:
             the MMD loss (a scalar)
         """
         return self.mmd(
-            X, sigmoid_inv(torch.rand(X.shape[0], X.shape[1], device=self.device)),
+            X, sigmoid_inv(torch.rand(X.shape[0], X.shape[1], device=X.device)),
         )
 
 

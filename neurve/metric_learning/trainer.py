@@ -18,12 +18,14 @@ class BaseTripletTrainer(Trainer):
         out_path,
         data_loader,
         eval_data_loader,
+        scheduler=None,
         use_wandb=False,
         device=None,
     ):
         super().__init__(
             net=net,
             opt=opt,
+            scheduler=scheduler,
             out_path=out_path,
             data_loader=data_loader,
             eval_data_loader=eval_data_loader,

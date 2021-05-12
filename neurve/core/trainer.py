@@ -46,6 +46,7 @@ class Trainer(object):
         out_path,
         data_loader,
         net_name="net",
+        scheduler=None,
         eval_data_loader=None,
         device=None,
         use_wandb=False,
@@ -76,6 +77,7 @@ class Trainer(object):
         self.net_name = net_name
         self.global_steps = 0
         self.use_wandb = use_wandb
+        self.scheduler = scheduler
 
         if not use_wandb:
             self.writer = SummaryWriter(self.out_path)
@@ -117,6 +119,8 @@ class Trainer(object):
                     return
 
                 ret_dict = self._train_step(data)
+                if self.scheduler is not None:
+                    self.scheduler.step()
                 self.global_steps += 1
 
                 # record loss values and update progress bar
