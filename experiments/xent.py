@@ -15,6 +15,7 @@ def main(
     resize_shape,
     lr,
     label_smoothing,
+    reg_loss_weight,
     num_features,
     dropout,
     n_epochs,
@@ -64,6 +65,7 @@ def main(
         data_loader=train_data_loader,
         eval_data_loader=val_data_loader,
         label_smoothing=label_smoothing,
+        reg_loss_weight=reg_loss_weight,
         use_wandb=use_wandb,
     )
 
@@ -78,6 +80,7 @@ if __name__ == "__main__":
     parser.add_argument("--lr", type=float, default=0.02)
     parser.add_argument("--label_smoothing", type=float, default=0.1)
     parser.add_argument("--dropout", type=float, default=0.5)
+    parser.add_argument("--reg_loss_weight", type=float, default=0.1)
     parser.add_argument("--n_epochs", type=int, default=30)
     parser.add_argument("--resize_shape", type=int, default=256)
     parser.add_argument("--save_ckpt_freq", type=int, default=100)

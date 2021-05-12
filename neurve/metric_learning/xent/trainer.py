@@ -5,6 +5,7 @@ from tqdm import tqdm
 
 from neurve.distance import pdist
 from neurve.metric_learning.trainer import BaseTripletTrainer
+from neurve.mmd import MMDLoss
 
 
 class SmoothCrossEntropy(nn.Module):
@@ -33,6 +34,7 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         data_loader,
         eval_data_loader,
         label_smoothing,
+        reg_loss_weight,
         use_wandb=False,
         device=None,
     ):
@@ -46,7 +48,10 @@ class CrossEntropyTrainer(BaseTripletTrainer):
             use_wandb=use_wandb,
             device=device,
         )
-        self.loss = SmoothCrossEntropy(label_smoothing)
+        self.reg_loss_weight = reg_loss_weight
+
+        self.xent_loss = SmoothCrossEntropy(label_smoothing)
+        self.mmd = MMDLoss("imq", net.num_features / 6)
 
     def pdist(self, X):
         return pdist(X, X)
@@ -56,9 +61,11 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         labels = labels.to(self.device)
         x = x.to(self.device)
 
-        logits, _ = self.net(x)
+        logits, features = self.net(x)
 
-        loss = self.loss(logits, labels).mean()
+        xent_loss = self.xent_loss(logits, labels).mean()
+        reg_loss = self.mmd(features)
+        loss = xent_loss + self.reg_loss_weight * reg_loss
 
         self.opt.zero_grad()
         loss.backward()
@@ -66,7 +73,8 @@ class CrossEntropyTrainer(BaseTripletTrainer):
 
         acc = (logits.detach().argmax(1) == labels).float().mean()
 
-        return {"train/loss": loss.item(), "train/acc": acc}
+        return {"train/loss": loss.item(), "train/xent_loss": xent_loss.item(),
+                "train/reg_loss": reg_loss.item(), "train/acc": acc}
 
     def _get_dists_and_targets(self):
         self.net.eval()
