@@ -53,6 +53,7 @@ class CrossEntropyTrainer(BaseTripletTrainer):
 
     def _train_step(self, data):
         x, labels = data
+        labels = labels.to(self.device)
         x = x.to(self.device)
 
         logits, _ = self.net(x)
