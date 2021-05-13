@@ -136,7 +136,6 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
         dim_z,
         reg_loss_weight,
         q_loss_weight,
-        emb_dim=None,
         use_wandb=False,
         device=None,
         one_hot_q=True,
@@ -150,8 +149,8 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
             use_wandb=use_wandb,
             device=device,
         )
-        self.emb_dim = emb_dim
-        if emb_dim is not None:
+        self.emb_dim = net.emb_dim
+        if self.emb_dim is not None:
             self.triplet_loss = TripletLoss(margin=margin)
         else:
             self.triplet_loss = ManifoldTripletLoss(margin=margin)

@@ -39,7 +39,9 @@ def main(
     out_path = wandb.run.dir if use_wandb else out_path
 
     if n_charts is not None:
-        net = TorchvisionMfldEmbed(backbone, dim_z, n_charts, pretrained=True)
+        net = TorchvisionMfldEmbed(
+            backbone, dim_z, n_charts, emb_dim=emb_dim, pretrained=True
+        )
     else:
         # dimension is dim_z + 1 since it gets normalized to the unit sphere
         net = TorchvisionEmbed(backbone, dim_z + 1, pretrained=True)
@@ -67,7 +69,6 @@ def main(
             eval_data_loader=val_data_loader,
             margin=margin,
             one_hot_q=True,
-            emb_dim=emb_dim,
             use_wandb=use_wandb,
         )
     else:
