@@ -17,20 +17,34 @@ class TorchvisionEmbed(nn.Module):
 
 
 class TorchvisionMfldEmbed(nn.Module):
-    def __init__(self, backbone, dim_z, n_charts, *args, **kwargs):
+    def __init__(self, backbone, dim_z, n_charts, emb_dim=None, *args, **kwargs):
         """
         Parameters
         ----------
         backbone : str
         dim_z : int
         n_charts : int
+        emb_dim : int
         """
         super().__init__()
+        self.emb_dim = emb_dim
         self.backbone = getattr(models, backbone)(*args, **kwargs)
         self.coords = nn.ModuleList([nn.Linear(1000, dim_z) for _ in range(n_charts)])
         self.q = nn.Sequential(nn.Linear(1000, n_charts), nn.Softmax(1))
 
-    def forward(self, x, return_backbone_emb=False):
+        if emb_dim is not None:
+            self.embedding_heads = nn.ModuleList(
+                [
+                    nn.Sequential(
+                        nn.Linear(dim_z, emb_dim, bias=True),
+                        nn.ReLU(),
+                        nn.Linear(emb_dim, emb_dim, bias=True),
+                    )
+                    for _ in range(n_charts)
+                ]
+            )
+
+    def forward(self, x):
         """
         Parameters
         ----------
@@ -48,8 +62,12 @@ class TorchvisionMfldEmbed(nn.Module):
         coords = torch.stack([c(x) for c in self.coords], 1)
         q = self.q(x)
 
-        if return_backbone_emb:
-            return q, coords, x
+        if self.emb_dim is not None:
+            embs = torch.stack(
+                [p(coords.select(1, i)) for i, p in enumerate(self.embedding_heads)], 1
+            )
+            embedding = (q.unsqueeze(2) * embs).sum(1)
+            return q, coords, embedding
 
         return q, coords
 

@@ -136,7 +136,7 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
         dim_z,
         reg_loss_weight,
         q_loss_weight,
-        use_backbone_emb,
+        emb_dim=None,
         use_wandb=False,
         device=None,
         one_hot_q=True,
@@ -150,8 +150,8 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
             use_wandb=use_wandb,
             device=device,
         )
-        self.use_backbone_emb = use_backbone_emb
-        if use_backbone_emb:
+        self.emb_dim = emb_dim
+        if emb_dim is not None:
             self.triplet_loss = TripletLoss(margin=margin)
         else:
             self.triplet_loss = ManifoldTripletLoss(margin=margin)
@@ -166,8 +166,8 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
         x, labels = data
         x = x.to(self.device)
 
-        if self.use_backbone_emb:
-            q, coords, emb = self.net(x, return_backbone_emb=True)
+        if self.emb_dim is not None:
+            q, coords, emb = self.net(x)
             triplet_loss, n_egs = self.triplet_loss(emb, labels)
         else:
             q, coords = self.net(x)
@@ -199,7 +199,7 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
             all_q.T, all_coords.transpose(0, 1), all_q.T, all_coords.transpose(0, 1)
         )
 
-    def _get_dists_and_targets_backbone_emb(self):
+    def _get_dists_and_targets_emb(self):
         self.net.eval()
         all_emb, all_y = None, None
         tqdm.write("Getting embeddings for evaluation data")
@@ -226,8 +226,8 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
         return dists, all_y
 
     def _get_dists_and_targets(self):
-        if self.use_backbone_emb:
-            return self._get_dists_and_targets_backbone_emb()
+        if self.emb_dim is not None:
+            return self._get_dists_and_targets_emb()
         return self._get_dists_and_targets_mfld()
 
     def _get_dists_and_targets_mfld(self):

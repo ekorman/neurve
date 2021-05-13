@@ -75,6 +75,7 @@ class SimCLRMfld(nn.Module):
         self.coords = nn.ModuleList([nn.Linear(2048, dim_z) for _ in range(n_charts)])
         self.q = nn.Sequential(nn.Linear(2048, n_charts), nn.Softmax(1))
 
+        # maybe should add bias?
         self.proj_heads = nn.ModuleList(
             [
                 nn.Sequential(
