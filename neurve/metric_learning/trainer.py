@@ -214,6 +214,8 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
                     all_y = torch.cat([all_y, y])
 
         emb_dists = pdist(all_emb, all_emb).numpy()
+        if self.one_hot_q:
+            all_q = F.one_hot(all_q.argmax(1), q.shape[1])
         chart_dists = pdist_mfld(
             all_q.T, all_coords.transpose(0, 1), all_q.T, all_coords.transpose(0, 1)
         ).numpy()
