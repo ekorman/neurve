@@ -36,7 +36,7 @@ class BaseTripletTrainer(Trainer):
     def _train_step(self, data):
         raise NotImplementedError
 
-    def log_metrics(self, dists, all_y):
+    def log_metrics(self, dists, all_y, prefix=None):
         """ Logs metrics
 
         Parameters
@@ -53,6 +53,8 @@ class BaseTripletTrainer(Trainer):
         all_y = np.take_along_axis(all_y, sorted_indices, -1)
 
         mets = retrieval_metrics(all_y[:, -1], all_y[:, :-1])
+        if prefix is not None:
+            mets = {f"{prefix}_{k}": v for k, v in mets.items()}
         print(f"Validation metrics: {mets}")
         self.log_dict({f"val/{k}": v for k, v in mets.items()})
 
@@ -193,11 +195,6 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
             "train/n_egs": n_egs,
         }
 
-    def pdist(self, all_q, all_coords):
-        return pdist_mfld(
-            all_q.T, all_coords.transpose(0, 1), all_q.T, all_coords.transpose(0, 1)
-        )
-
     def _get_dists_and_targets_emb(self):
         self.net.eval()
         all_emb, all_y = None, None
@@ -205,15 +202,29 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
         with torch.no_grad():
             for x, y in tqdm(self.eval_data_loader):
                 if all_emb is None:
-                    all_emb = self.net(x.to(self.device))[2].cpu()
+                    all_q, all_coords, all_emb = [
+                        out.cpu() for out in self.net(x.to(self.device))
+                    ]
                     all_y = y
                 else:
-                    all_emb = torch.cat([all_emb, self.net(x.to(self.device))[2].cpu()])
-                    all_y = torch.cat([all_y, y])
+                    q, coords, emb = self.net(x.to(self.device))
+                    all_q = torch.cat([all_q, q.cpu()])
+                    all_coords = torch.cat([all_coords, coords.cpu()])
+                    all_emb = torch.cat([all_emb, self.net(x.to(self.device))])
 
-        dists = pdist(all_emb, all_emb).numpy()
+        emb_dists = pdist(all_emb, all_emb).numpy()
+        chart_dists = pdist_mfld(
+            all_q.T, all_coords.transpose(0, 1), all_q.T, all_coords.transpose(0, 1)
+        ).numpy()
         all_y = all_y.numpy()
-        return dists, all_y
+        return emb_dists, chart_dists, all_y
+
+    def eval(self):
+        if self.emb_dim is None:
+            return super().eval()
+        emb_dists, chart_dists, all_y = self._get_dists_and_targets_emb()
+        self.log_metrics(emb_dists, all_y, prefix="embedding")
+        self.log_metrics(chart_dists, all_y, prefix="chart")
 
     def _get_dists_and_targets(self):
         if self.emb_dim is not None:
@@ -239,7 +250,9 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
         if self.one_hot_q:
             all_q = F.one_hot(all_q.argmax(1), q.shape[1])
 
-        dists = self.pdist(all_q, all_coords).numpy()
+        dists = pdist_mfld(
+            all_q.T, all_coords.transpose(0, 1), all_q.T, all_coords.transpose(0, 1)
+        ).numpy()
         all_y = all_y.numpy()
 
         return dists, all_y

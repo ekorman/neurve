@@ -33,15 +33,18 @@ class TorchvisionMfldEmbed(nn.Module):
         self.q = nn.Sequential(nn.Linear(1000, n_charts), nn.Softmax(1))
 
         if emb_dim is not None:
+            # self.embedding_heads = nn.ModuleList(
+            #     [
+            #         nn.Sequential(
+            #             nn.Linear(dim_z, emb_dim, bias=True),
+            #             nn.ReLU(),
+            #             nn.Linear(emb_dim, emb_dim, bias=True),
+            #         )
+            #         for _ in range(n_charts)
+            #     ]
+            # )
             self.embedding_heads = nn.ModuleList(
-                [
-                    nn.Sequential(
-                        nn.Linear(dim_z, emb_dim, bias=True),
-                        nn.ReLU(),
-                        nn.Linear(emb_dim, emb_dim, bias=True),
-                    )
-                    for _ in range(n_charts)
-                ]
+                [nn.Linear(dim_z, emb_dim, bias=True) for _ in range(n_charts)]
             )
 
     def forward(self, x):
