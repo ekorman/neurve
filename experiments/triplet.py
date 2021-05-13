@@ -28,6 +28,7 @@ def main(
     eval_freq,
     reg_loss_weight,
     q_loss_weight,
+    use_backbone_emb,
     use_wandb,
     out_path,
     num_workers,
@@ -66,6 +67,7 @@ def main(
             eval_data_loader=val_data_loader,
             margin=margin,
             one_hot_q=True,
+            use_backbone_emb=use_backbone_emb,
             use_wandb=use_wandb,
         )
     else:
@@ -118,6 +120,7 @@ if __name__ == "__main__":
         " Otherwise training is done on the entire train dataset and evaluated in the test dataset",
         default="test",
     )
+    parser.add_argument("--use_backbone_emb", action="store_true")
 
     args = parser.parse_args()
 

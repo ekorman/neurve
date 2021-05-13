@@ -33,9 +33,6 @@ class BaseTripletTrainer(Trainer):
             use_wandb=use_wandb,
         )
 
-    def pdist(self, X):
-        raise NotImplementedError
-
     def _train_step(self, data):
         raise NotImplementedError
 
@@ -139,6 +136,7 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
         dim_z,
         reg_loss_weight,
         q_loss_weight,
+        use_backbone_emb,
         use_wandb=False,
         device=None,
         one_hot_q=True,
@@ -152,8 +150,11 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
             use_wandb=use_wandb,
             device=device,
         )
-
-        self.triplet_loss = ManifoldTripletLoss(margin=margin)
+        self.use_backbone_emb = use_backbone_emb
+        if use_backbone_emb:
+            self.triplet_loss = ManifoldTripletLoss(margin=margin)
+        else:
+            self.triplet_loss = TripletLoss(margin=margin)
         self.reg_loss = MMDManifoldLoss(
             kernel="imq", sigma=dim_z / 6, device=self.device
         )
@@ -165,9 +166,12 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
         x, labels = data
         x = x.to(self.device)
 
-        q, coords = self.net(x)
-
-        triplet_loss, n_egs = self.triplet_loss(q, coords, labels)
+        if self.use_backbone_emb:
+            q, coords, emb = self.net(x, return_backbone_emb=True)
+            triplet_loss, n_egs = self.triplet_loss(emb)
+        else:
+            q, coords = self.net(x)
+            triplet_loss, n_egs = self.triplet_loss(q, coords, labels)
 
         reg_loss = self.reg_loss(q, coords)
 
@@ -195,7 +199,38 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
             all_q.T, all_coords.transpose(0, 1), all_q.T, all_coords.transpose(0, 1)
         )
 
+    def _get_dists_and_targets_backbone_emb(self):
+        self.net.eval()
+        all_emb, all_y = None, None
+        tqdm.write("Getting embeddings for evaluation data")
+        with torch.no_grad():
+            for x, y in tqdm(self.eval_data_loader):
+                if all_emb is None:
+                    all_emb = self.net(x.to(self.device), return_backbone_emb=True)[
+                        2
+                    ].cpu()
+                    all_y = y
+                else:
+                    all_emb = torch.cat(
+                        [
+                            all_emb,
+                            self.net(x.to(self.device), return_backbone_emb=True)[
+                                2
+                            ].cpu(),
+                        ]
+                    )
+                    all_y = torch.cat([all_y, y])
+
+        dists = pdist(all_emb, all_emb).numpy()
+        all_y = all_y.numpy()
+        return dists, all_y
+
     def _get_dists_and_targets(self):
+        if self.use_backbone_emb:
+            return self._get_dists_and_targets_backbone_emb()
+        return self._get_dists_and_targets_mfld()
+
+    def _get_dists_and_targets_mfld(self):
         self.net.eval()
         all_q, all_coords, all_y = None, None, None
         with torch.no_grad():
