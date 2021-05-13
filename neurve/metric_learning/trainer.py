@@ -168,7 +168,7 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
 
         if self.use_backbone_emb:
             q, coords, emb = self.net(x, return_backbone_emb=True)
-            triplet_loss, n_egs = self.triplet_loss(emb)
+            triplet_loss, n_egs = self.triplet_loss(emb, labels)
         else:
             q, coords = self.net(x)
             triplet_loss, n_egs = self.triplet_loss(q, coords, labels)
