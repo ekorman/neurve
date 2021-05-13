@@ -27,6 +27,7 @@ def main(
     out_path,
     num_workers,
     val_or_test,
+    kernel,
 ):
     assert val_or_test in ["val", "test"]
 
@@ -49,8 +50,13 @@ def main(
         set_bn_eval=True,
     )
 
-    parameters = [{'params': [par for par in net.parameters() if par.dim() != 1]},
-            {'params': [par for par in net.parameters() if par.dim() == 1], 'weight_decay': 0}]
+    parameters = [
+        {"params": [par for par in net.parameters() if par.dim() != 1]},
+        {
+            "params": [par for par in net.parameters() if par.dim() == 1],
+            "weight_decay": 0,
+        },
+    ]
     opt = SGD(parameters, lr=lr, nesterov=False, weight_decay=5e-4)
     warm_cosine = lambda i: min(
         (i + 1) / 100,
@@ -67,6 +73,7 @@ def main(
         eval_data_loader=val_data_loader,
         label_smoothing=label_smoothing,
         c=c,
+        kernel=kernel,
         reg_loss_weight=reg_loss_weight,
         use_wandb=use_wandb,
     )
@@ -84,6 +91,7 @@ if __name__ == "__main__":
     parser.add_argument("--dropout", type=float, default=0.5)
     parser.add_argument("--reg_loss_weight", type=float, default=0.1)
     parser.add_argument("--c", type=float, default=1.0)
+    parser.add_argument("--kernel", type=str, default="imq")
     parser.add_argument("--n_epochs", type=int, default=30)
     parser.add_argument("--resize_shape", type=int, default=256)
     parser.add_argument("--save_ckpt_freq", type=int, default=100)

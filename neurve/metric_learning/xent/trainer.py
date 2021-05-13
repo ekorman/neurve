@@ -36,6 +36,7 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         label_smoothing,
         reg_loss_weight,
         c,
+        kernel,
         use_wandb=False,
         device=None,
     ):
@@ -52,7 +53,7 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         self.reg_loss_weight = reg_loss_weight
 
         self.xent_loss = SmoothCrossEntropy(label_smoothing)
-        self.mmd = MMDLoss("imq", net.num_features * c/ 6)
+        self.mmd = MMDLoss(kernel, net.num_features * c / 6)
 
     def pdist(self, X):
         return pdist(X, X)
@@ -68,7 +69,6 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         reg_loss = self.mmd(features)
         loss = xent_loss + self.reg_loss_weight * reg_loss
 
-        
         self.opt.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_(self.net.parameters(), 100)
@@ -76,8 +76,12 @@ class CrossEntropyTrainer(BaseTripletTrainer):
 
         acc = (logits.detach().argmax(1) == labels).float().mean()
 
-        return {"train/loss": loss.item(), "train/xent_loss": xent_loss.item(),
-                "train/reg_loss": reg_loss.item(), "train/acc": acc}
+        return {
+            "train/loss": loss.item(),
+            "train/xent_loss": xent_loss.item(),
+            "train/reg_loss": reg_loss.item(),
+            "train/acc": acc,
+        }
 
     def _get_dists_and_targets(self):
         self.net.eval()

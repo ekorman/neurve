@@ -7,9 +7,9 @@ def sigmoid_inv(x):
     return torch.clamp(torch.log(x / (1 - x)), -10000, 10000)
 
 
-def rbf(X, Y, sigma, batch=False):
+def rbf(X, Y, C, batch=False):
     d = batch_pdist if batch else pdist
-    return torch.exp(-d(X, Y) / 2 / sigma ** 2)
+    return torch.exp(-d(X, Y) / C)
 
 
 def imq(X, Y, C, batch=False):
