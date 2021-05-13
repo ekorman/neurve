@@ -210,7 +210,7 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
                     q, coords, emb = self.net(x.to(self.device))
                     all_q = torch.cat([all_q, q.cpu()])
                     all_coords = torch.cat([all_coords, coords.cpu()])
-                    all_emb = torch.cat([all_emb, self.net(x.to(self.device))])
+                    all_emb = torch.cat([all_emb, emb.cpu()])
 
         emb_dists = pdist(all_emb, all_emb).numpy()
         chart_dists = pdist_mfld(
