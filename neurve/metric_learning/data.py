@@ -126,10 +126,7 @@ def get_data_loaders(
         batch_sampler = BalancedClassBatchSampler(train_dset, n_classes, n_per_class)
         batch_size = n_per_class * n_classes
         train_data_loader = DataLoader(
-            train_dset,
-            batch_sampler=batch_sampler,
-            num_workers=num_workers,
-            drop_last=True,
+            train_dset, batch_sampler=batch_sampler, num_workers=num_workers
         )
     else:
         assert n_per_class is None
