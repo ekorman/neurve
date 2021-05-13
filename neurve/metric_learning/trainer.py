@@ -197,7 +197,7 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
 
     def _get_dists_and_targets_emb(self):
         self.net.eval()
-        all_emb, all_y = None, None
+        all_emb = None
         tqdm.write("Getting embeddings for evaluation data")
         with torch.no_grad():
             for x, y in tqdm(self.eval_data_loader):
@@ -211,6 +211,7 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
                     all_q = torch.cat([all_q, q.cpu()])
                     all_coords = torch.cat([all_coords, coords.cpu()])
                     all_emb = torch.cat([all_emb, emb.cpu()])
+                    all_y = torch.cat([all_y, y])
 
         emb_dists = pdist(all_emb, all_emb).numpy()
         chart_dists = pdist_mfld(
