@@ -152,9 +152,9 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
         )
         self.use_backbone_emb = use_backbone_emb
         if use_backbone_emb:
-            self.triplet_loss = ManifoldTripletLoss(margin=margin)
-        else:
             self.triplet_loss = TripletLoss(margin=margin)
+        else:
+            self.triplet_loss = ManifoldTripletLoss(margin=margin)
         self.reg_loss = MMDManifoldLoss(
             kernel="imq", sigma=dim_z / 6, device=self.device
         )
