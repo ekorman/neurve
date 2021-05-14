@@ -1,3 +1,4 @@
+import geotorch
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -43,9 +44,12 @@ class TorchvisionMfldEmbed(nn.Module):
             #         for _ in range(n_charts)
             #     ]
             # )
-            self.embedding_heads = nn.ModuleList(
-                [nn.Linear(dim_z, emb_dim, bias=True) for _ in range(n_charts)]
-            )
+            embedding_heads = []
+            for _ in range(n_charts):
+                embedding_heads.append(nn.Linear(dim_z, emb_dim, bias=True))
+                geotorch.orthogonal(embedding_heads[-1], "weight")
+
+            self.embedding_heads = nn.ModuleList(embedding_heads)
 
     def forward(self, x):
         """
