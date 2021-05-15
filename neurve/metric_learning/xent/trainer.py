@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 
-from neurve.distance import pdist
+from neurve.distance import pdist, pdist_mfld
 from neurve.metric_learning.trainer import BaseTripletTrainer
 from neurve.mmd import MMDManifoldLoss, MMDLoss, q_loss
 
@@ -106,6 +106,36 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         return ret_dict
 
     def _get_dists_and_targets(self):
+        if self.net.is_atlas:
+            return self._get_dists_and_targets_euc()
+        return self._get_dists_and_targets_mfld()
+
+    def _get_dists_and_targets_mfld(self):
+        self.net.eval()
+        all_q, all_coords, all_y = None, None, None
+        with torch.no_grad():
+            for x, y in tqdm(self.eval_data_loader):
+                if all_q is None:
+                    _, all_q, all_coords = self.net(x.to(self.device))
+                    all_y = y
+                else:
+                    _, q, coords = self.net(x.to(self.device))
+                    all_q = torch.cat([all_q, q])
+                    all_coords = torch.cat([all_coords, coords])
+                    all_y = torch.cat([all_y, y])
+
+        all_coords = all_coords.cpu()
+        all_q = all_q.cpu()
+        all_q = F.one_hot(all_q.argmax(1), q.shape[1])
+
+        dists = pdist_mfld(
+            all_q.T, all_coords.transpose(0, 1), all_q.T, all_coords.transpose(0, 1)
+        ).numpy()
+        all_y = all_y.numpy()
+
+        return dists, all_y
+
+    def _get_dists_and_targets_euc(self):
         self.net.eval()
         all_emb, all_y = None, None
         tqdm.write("Getting embeddings for evaluation data")
