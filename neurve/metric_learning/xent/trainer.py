@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from neurve.distance import pdist
 from neurve.metric_learning.trainer import BaseTripletTrainer
-from neurve.mmd import MMDLoss
+from neurve.mmd import MMDManifoldLoss, MMDLoss
 
 
 class SmoothCrossEntropy(nn.Module):
@@ -57,7 +57,12 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         else:
             print("Using regular cross entropy loss")
             self.xent_loss = nn.CrossEntropyLoss()
-        self.mmd = MMDLoss(kernel, net.num_features * c / 6)
+        if self.net.is_atlas:
+            self.mmd = MMDManifoldLoss(
+                kernel="imq", sigma=net.dim_z / 6, device=self.device
+            )
+        else:
+            self.mmd = MMDLoss(kernel, net.num_features * c / 6)
 
     def pdist(self, X):
         return pdist(X, X)
@@ -67,10 +72,15 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         labels = labels.to(self.device)
         x = x.to(self.device)
 
-        logits, features = self.net(x)
+        if self.net.is_atlas:
+            logits, q, coords = self.net(x)
+            reg_loss = self.mmd(q, coords)
+        else:
+            logits, features = self.net(x)
+            reg_loss = self.mmd(features)
 
         xent_loss = self.xent_loss(logits, labels).mean()
-        reg_loss = self.mmd(features)
+
         loss = xent_loss + self.reg_loss_weight * reg_loss
 
         self.opt.zero_grad()
@@ -80,12 +90,17 @@ class CrossEntropyTrainer(BaseTripletTrainer):
 
         acc = (logits.detach().argmax(1) == labels).float().mean()
 
-        return {
+        ret_dict = {
             "train/loss": loss.item(),
             "train/xent_loss": xent_loss.item(),
             "train/reg_loss": reg_loss.item(),
             "train/acc": acc,
         }
+
+        if self.net.is_atlas:
+            ret_dict["train/q_max"] = q.detach().cpu().max(1)[0].mean()
+
+        return ret_dict
 
     def _get_dists_and_targets(self):
         self.net.eval()

@@ -9,7 +9,9 @@ class BaseModel(nn.Module):
     def __init__(
         self,
         num_classes: int,
-        num_features: int,
+        num_features: int = None,
+        n_charts: int = None,
+        dim_z: int = None,
         dropout: float = 0.0,
         detach: bool = False,
         norm_layer: Optional[str] = None,
@@ -17,8 +19,15 @@ class BaseModel(nn.Module):
         set_bn_eval: bool = False,
         remap: bool = False,
         normalize_weight: bool = False,
-        **kwargs
     ) -> None:
+        assert (num_features is not None) != (
+            n_charts is not None and dim_z is not None
+        )
+        self.is_atlas = num_features is None
+
+        if self.is_atlas:
+            assert dropout == 0.0
+            assert not normalize_weight
         super(BaseModel, self).__init__()
         self.num_classes = num_classes
         self.num_features = num_features
@@ -36,14 +45,27 @@ class BaseModel(nn.Module):
             self.norm_layer = nn.BatchNorm1d(self.backbone_features, affine=False)
 
         self.remap = nn.Identity()
-        if remap or num_features != self.backbone_features:
+        if not self.is_atlas and (remap or num_features != self.backbone_features):
             self.remap = nn.Linear(self.backbone_features, num_features)
             nn.init.zeros_(self.remap.bias)
 
         self.dropout = nn.Dropout(p=dropout)
-        self.classifier = nn.Linear(num_features, num_classes)
-        nn.init.zeros_(self.classifier.weight)
-        nn.init.zeros_(self.classifier.bias)
+
+        if self.is_atlas:
+            self.coords = nn.ModuleList(
+                [nn.Linear(1000, dim_z) for _ in range(n_charts)]
+            )
+            self.q = nn.Sequential(nn.Linear(1000, n_charts), nn.Softmax(1))
+            self.classifiers = nn.ModuleList(
+                [nn.Linear(dim_z, num_classes) for _ in range(n_charts)]
+            )
+            for c in self.classifiers:
+                nn.init.zeros_(c.weight)
+                nn.init.zeros_(c.bias)
+        else:
+            self.classifier = nn.Linear(num_features, num_classes)
+            nn.init.zeros_(self.classifier.weight)
+            nn.init.zeros_(self.classifier.bias)
 
     def init(self):
         for m in self.modules():
@@ -67,17 +89,26 @@ class BaseModel(nn.Module):
         if self.normalize:
             features = nn.functional.normalize(features, p=2, dim=1)
 
-        classification_features = self.dropout(
-            features.detach() if self.detach else features
-        )
-        classifier_weight = self.classifier.weight
-        if self.normalize_weight:
-            classifier_weight = F.normalize(classifier_weight)
-        logits = F.linear(
-            classification_features, classifier_weight, self.classifier.bias
-        )
+        if self.is_atlas:
+            q, coords = self.q(features), torch.stack([c(x) for c in self.coords], 1)
+            logit_comps = torch.stack(
+                [p(coords.select(1, i)) for i, p in enumerate(self.classifiers)], 1
+            )
+            logits = (q.unsqueeze(2) * logit_comps).sum(1)
 
-        return logits, features
+            return logits, q, coords
+        else:
+            classification_features = self.dropout(
+                features.detach() if self.detach else features
+            )
+            classifier_weight = self.classifier.weight
+            if self.normalize_weight:
+                classifier_weight = F.normalize(classifier_weight)
+            logits = F.linear(
+                classification_features, classifier_weight, self.classifier.bias
+            )
+
+            return logits, features
 
     def train(self, mode=True):
         r"""Sets the module in training mode.
