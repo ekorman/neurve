@@ -107,8 +107,8 @@ class CrossEntropyTrainer(BaseTripletTrainer):
 
     def _get_dists_and_targets(self):
         if self.net.is_atlas:
-            return self._get_dists_and_targets_euc()
-        return self._get_dists_and_targets_mfld()
+            return self._get_dists_and_targets_mfld()
+        return self._get_dists_and_targets_euc()
 
     def _get_dists_and_targets_mfld(self):
         self.net.eval()
