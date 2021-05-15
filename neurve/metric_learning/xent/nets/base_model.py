@@ -62,9 +62,9 @@ class BaseModel(nn.Module):
             self.classifiers = nn.ModuleList(
                 [nn.Linear(dim_z, num_classes) for _ in range(n_charts)]
             )
-            for c in self.classifiers:
-                nn.init.zeros_(c.weight)
-                nn.init.zeros_(c.bias)
+            # for c in self.classifiers:
+            #     nn.init.zeros_(c.weight)
+            #     nn.init.zeros_(c.bias)
         else:
             self.classifier = nn.Linear(num_features, num_classes)
             nn.init.zeros_(self.classifier.weight)
