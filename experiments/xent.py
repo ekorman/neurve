@@ -18,6 +18,8 @@ def main(
     c,
     reg_loss_weight,
     num_features,
+    n_charts,
+    dim_z,
     dropout,
     n_epochs,
     batch_size,
@@ -46,6 +48,8 @@ def main(
         pretrained=True,
         num_classes=len(set(train_data_loader.dataset.targets)),
         num_features=num_features,
+        n_charts=n_charts,
+        dim_z=dim_z,
         dropout=dropout,
         set_bn_eval=True,
     )
@@ -105,7 +109,9 @@ if __name__ == "__main__":
         default="test",
     )
     parser.add_argument("--batch_size", type=int, default=128)
-    parser.add_argument("--num_features", type=int, default=2048)
+    parser.add_argument("--num_features", type=int)
+    parser.add_argument("--n_charts", type=int)
+    parser.add_argument("--dim_z", type=int)
 
     args = parser.parse_args()
 

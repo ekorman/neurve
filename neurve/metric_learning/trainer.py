@@ -156,9 +156,7 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
             self.triplet_loss = TripletLoss(margin=margin)
         else:
             self.triplet_loss = ManifoldTripletLoss(margin=margin)
-        self.reg_loss = MMDManifoldLoss(
-            kernel="imq", sigma=dim_z / 6, device=self.device
-        )
+        self.reg_loss = MMDManifoldLoss(kernel="imq", sigma=dim_z / 6)
         self.reg_loss_weight = reg_loss_weight
         self.q_loss_weight = q_loss_weight
         self.one_hot_q = one_hot_q

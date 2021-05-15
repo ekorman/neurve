@@ -58,9 +58,7 @@ class CrossEntropyTrainer(BaseTripletTrainer):
             print("Using regular cross entropy loss")
             self.xent_loss = nn.CrossEntropyLoss()
         if self.net.is_atlas:
-            self.mmd = MMDManifoldLoss(
-                kernel="imq", sigma=net.dim_z / 6, device=self.device
-            )
+            self.mmd = MMDManifoldLoss(kernel="imq", sigma=net.dim_z / 6)
         else:
             self.mmd = MMDLoss(kernel, net.num_features * c / 6)
 

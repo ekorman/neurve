@@ -23,6 +23,7 @@ class BaseModel(nn.Module):
         assert (num_features is not None) != (
             n_charts is not None and dim_z is not None
         )
+        self.dim_z = dim_z
         self.is_atlas = num_features is None
 
         if self.is_atlas:
@@ -53,9 +54,11 @@ class BaseModel(nn.Module):
 
         if self.is_atlas:
             self.coords = nn.ModuleList(
-                [nn.Linear(1000, dim_z) for _ in range(n_charts)]
+                [nn.Linear(self.backbone_features, dim_z) for _ in range(n_charts)]
             )
-            self.q = nn.Sequential(nn.Linear(1000, n_charts), nn.Softmax(1))
+            self.q = nn.Sequential(
+                nn.Linear(self.backbone_features, n_charts), nn.Softmax(1)
+            )
             self.classifiers = nn.ModuleList(
                 [nn.Linear(dim_z, num_classes) for _ in range(n_charts)]
             )
@@ -90,7 +93,10 @@ class BaseModel(nn.Module):
             features = nn.functional.normalize(features, p=2, dim=1)
 
         if self.is_atlas:
-            q, coords = self.q(features), torch.stack([c(x) for c in self.coords], 1)
+            q, coords = (
+                self.q(features),
+                torch.stack([c(features) for c in self.coords], 1),
+            )
             logit_comps = torch.stack(
                 [p(coords.select(1, i)) for i, p in enumerate(self.classifiers)], 1
             )
