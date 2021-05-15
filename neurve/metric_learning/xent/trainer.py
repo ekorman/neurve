@@ -101,7 +101,9 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         }
 
         if self.net.is_atlas:
-            ret_dict["train/q_max"] = q.detach().cpu().max(1)[0].mean()
+            q = q.detach().cpu()
+            ret_dict["train/q_max"] = q.max(1)[0].mean()
+            ret_dict["train/unique_q_argmax"] = q.argmax(1).unique()
 
         return ret_dict
 
