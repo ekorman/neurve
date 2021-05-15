@@ -52,7 +52,11 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         )
         self.reg_loss_weight = reg_loss_weight
 
-        self.xent_loss = SmoothCrossEntropy(label_smoothing)
+        if label_smoothing is not None:
+            self.xent_loss = SmoothCrossEntropy(label_smoothing)
+        else:
+            print("Using regular cross entropy loss")
+            self.xent_loss = nn.CrossEntropyLoss()
         self.mmd = MMDLoss(kernel, net.num_features * c / 6)
 
     def pdist(self, X):
