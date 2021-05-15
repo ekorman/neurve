@@ -17,6 +17,7 @@ def main(
     label_smoothing,
     c,
     reg_loss_weight,
+    q_loss_weight,
     num_features,
     n_charts,
     dim_z,
@@ -79,6 +80,7 @@ def main(
         c=c,
         kernel=kernel,
         reg_loss_weight=reg_loss_weight,
+        q_loss_weight=q_loss_weight,
         use_wandb=use_wandb,
     )
 
@@ -94,6 +96,7 @@ if __name__ == "__main__":
     parser.add_argument("--label_smoothing")
     parser.add_argument("--dropout", type=float, default=0.5)
     parser.add_argument("--reg_loss_weight", type=float, default=0.1)
+    parser.add_argument("--q_loss_weight", type=float)
     parser.add_argument("--c", type=float, default=1.0)
     parser.add_argument("--kernel", type=str, default="imq")
     parser.add_argument("--n_epochs", type=int, default=30)

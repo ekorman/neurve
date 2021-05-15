@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 from neurve.distance import pdist
 from neurve.metric_learning.trainer import BaseTripletTrainer
-from neurve.mmd import MMDManifoldLoss, MMDLoss
+from neurve.mmd import MMDManifoldLoss, MMDLoss, q_loss
 
 
 class SmoothCrossEntropy(nn.Module):
@@ -35,6 +35,7 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         eval_data_loader,
         label_smoothing,
         reg_loss_weight,
+        q_loss_weight,
         c,
         kernel,
         use_wandb=False,
@@ -51,6 +52,7 @@ class CrossEntropyTrainer(BaseTripletTrainer):
             device=device,
         )
         self.reg_loss_weight = reg_loss_weight
+        self.q_loss_weight = q_loss_weight
 
         if label_smoothing is not None:
             self.xent_loss = SmoothCrossEntropy(label_smoothing)
@@ -80,6 +82,9 @@ class CrossEntropyTrainer(BaseTripletTrainer):
         xent_loss = self.xent_loss(logits, labels).mean()
 
         loss = xent_loss + self.reg_loss_weight * reg_loss
+
+        if self.net.is_atlas:
+            loss += -self.q_loss_weight * q_loss(q)
 
         self.opt.zero_grad()
         loss.backward()
