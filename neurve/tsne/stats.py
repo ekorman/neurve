@@ -26,8 +26,18 @@ def cond_matrix(var2, X=None, dists=None):
         dists = pdist(X, X)
     inv_var2 = (1 / var2).diag()
     exps = torch.exp(-inv_var2 @ dists / 2)
-    denom = exps.sum(dim=1, keepdim=True) - 1
-    return exps / denom
+    exps.fill_diagonal_(0.0)
+    denom = exps.sum(dim=1, keepdim=True)
+    ret = exps / denom
+    return ret + 1e-9
+
+
+def joint_q(E):
+    dists = pdist(E, E)
+    t = 1 / (1 + dists)
+    t.fill_diagonal_(0.0)
+    denom = t.sum()
+    return t / denom
 
 
 def entropy(P):
