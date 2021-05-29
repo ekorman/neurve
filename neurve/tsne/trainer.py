@@ -98,10 +98,10 @@ class TSNETrainer(Trainer):
         else:
             fig = plt.figure()
             ax = fig.add_subplot(projection="3d")
-            ax.scatter(
+            p = ax.scatter(
                 all_embs[:, 0], all_embs[:, 1], all_embs[:, 2], c=all_labels, s=2
             )
-            ax.colorbar()
+            fig.colorbar(p)
         wandb.log({"embedding": wandb.Image(plt)})
 
 
@@ -164,6 +164,8 @@ class MfldTSNETrainer(Trainer):
 
         fig = plt.figure()
         ax = fig.add_subplot(projection="3d")
-        ax.scatter(all_embs[:, 0], all_embs[:, 1], all_embs[:, 2], c=all_labels, s=2)
-        ax.colorbar()
+        p = ax.scatter(
+            all_embs[:, 0], all_embs[:, 1], all_embs[:, 2], c=all_labels, s=2
+        )
+        fig.colorbar(p)
         wandb.log({"embedding": wandb.Image(plt)})
