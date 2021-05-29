@@ -161,7 +161,7 @@ class MfldTSNETrainer(Trainer):
                 s=5,
             )
             plt.colorbar()
-            wandb.log({f"chart_{c}": plt})
+            wandb.log({f"chart_{c}": wandb.Image(plt)})
 
         fig = plt.figure()
         ax = fig.add_subplot(projection="3d")
