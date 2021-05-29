@@ -18,7 +18,9 @@ def run_from_conf(conf):
     train_dset = FlatMNIST(train=True, download=True, root=conf["data_root"])
     train_dl = DataLoader(train_dset, batch_size=conf["batch_size"])
 
-    val_dset = FlatMNIST(train=False, download=True, root=conf["data_root"])
+    val_dset = FlatMNIST(
+        train=False, download=True, root=conf["data_root"], return_labels=True
+    )
     val_dl = DataLoader(val_dset, batch_size=conf["batch_size"])
     if conf.get("n_charts") is None:
         net = MLP(28 * 28, conf["out_dim"])
