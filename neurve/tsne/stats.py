@@ -68,10 +68,10 @@ def kl_div(P, Q):
     torch.Tensor
         scalar
     """
-    return (P * torch.log(P / Q)).sum()
+    return (P * torch.log((P + 1e-10) / (Q + 1e-10))).sum()
 
 
-def find_var2(min_val, max_val, target, tol, dists, max_iters=1000):
+def get_cond_dist_given_perp(min_val, max_val, target, tol, X, max_iters=1000):
     """
     Parameters
     ----------
@@ -79,9 +79,10 @@ def find_var2(min_val, max_val, target, tol, dists, max_iters=1000):
     max_val : float
     target : float
     tol : float
-    dists: torch.Tensor
-        shape [N, N]
+    X : torch.Tensor
+        shape [N, D]
     """
+    dists = pdist(X, X)
     var2 = None
     N = dists.shape[0]
     finished = torch.zeros(N, dtype=bool)
@@ -100,7 +101,7 @@ def find_var2(min_val, max_val, target, tol, dists, max_iters=1000):
         finished = torch.abs(diff) < tol
 
         if finished.all():
-            return var2
+            return cond_dist
 
         max_val = (diff > 0) * var2 + ~(diff > 0) * max_val
         min_val = ~(diff > 0) * var2 + (diff > 0) * min_val
