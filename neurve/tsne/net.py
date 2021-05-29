@@ -5,6 +5,7 @@ import torch.nn as nn
 class MLP(nn.Module):
     def __init__(self, input_dim, out_dim=2):
         super().__init__()
+        self.out_dim = out_dim
         self.net = nn.Sequential(
             nn.Linear(input_dim, 64),
             nn.ReLU(),
@@ -22,6 +23,7 @@ class MLP(nn.Module):
 class MfldMLP(nn.Module):
     def __init__(self, input_dim, n_charts):
         super().__init__()
+        self.n_charts = n_charts
         self.backbone = nn.Sequential(
             nn.Linear(input_dim, 64),
             nn.ReLU(),
