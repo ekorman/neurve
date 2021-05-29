@@ -46,7 +46,11 @@ def run_from_conf(conf):
             out_path=wandb.run.dir,
         )
 
-    trainer.train(conf["n_epochs"])
+    trainer.train(
+        conf["n_epochs"],
+        save_ckpt_freq=conf.get("save_ckpt_freq") or np.infty,
+        eval_freq=conf.get("eval_freq") or np.infty,
+    )
 
 
 class TSNELoss:
