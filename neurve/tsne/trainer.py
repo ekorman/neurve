@@ -21,6 +21,7 @@ class TSNETrainer(Trainer):
         self.loss = TSNELoss(perplexity)
 
     def _train_step(self, data):
+        data = data.to(self.device)
         E = self.net(data)
         loss = self.loss(data, E)
 
@@ -40,6 +41,7 @@ class MfldTSNETrainer(Trainer):
         self.q_loss_weight = q_loss_weight
 
     def _train_step(self, data):
+        data = data.to(self.device)
         q, coords, E = self.net(data)
 
         tsne_loss = self.tsne_loss(data, E)
