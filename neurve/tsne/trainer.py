@@ -11,48 +11,48 @@ from neurve.tsne.net import MfldMLP, MLP
 from neurve.tsne.stats import get_cond_dist_given_perp, joint_q, kl_div
 
 
-def run_from_conf(conf):
-    wandb.init(project="tsne")
-    wandb.config.update(conf)
+def run_from_config(configig):
+    with wandb.init(config=config):
+        config = wandb.config
 
-    train_dset = FlatMNIST(train=True, download=True, root=conf["data_root"])
-    train_dl = DataLoader(train_dset, batch_size=conf["batch_size"])
+        train_dset = FlatMNIST(train=True, download=True, root=config["data_root"])
+        train_dl = DataLoader(train_dset, batch_size=config["batch_size"])
 
-    val_dset = FlatMNIST(
-        train=False, download=True, root=conf["data_root"], return_labels=True
-    )
-    val_dl = DataLoader(val_dset, batch_size=conf["batch_size"])
-    if conf.get("n_charts") is None:
-        net = MLP(28 * 28, conf["out_dim"])
-        opt = SGD(params=net.parameters(), lr=conf["lr"])
-        trainer = TSNETrainer(
-            perplexity=conf["perplexity"],
-            data_loader=train_dl,
-            eval_data_loader=val_dl,
-            net=net,
-            opt=opt,
-            use_wandb=True,
-            out_path=wandb.run.dir,
+        val_dset = FlatMNIST(
+            train=False, download=True, root=config["data_root"], return_labels=True
         )
-    else:
-        net = MfldMLP(28 * 28, conf["n_charts"])
-        opt = SGD(params=net.parameters(), lr=conf["lr"])
-        trainer = MfldTSNETrainer(
-            perplexity=conf["perplexity"],
-            data_loader=train_dl,
-            net=net,
-            opt=opt,
-            reg_loss_weight=conf["reg_loss_weight"],
-            q_loss_weight=conf["q_loss_weight"],
-            use_wandb=True,
-            out_path=wandb.run.dir,
-        )
+        val_dl = DataLoader(val_dset, batch_size=config["batch_size"])
+        if config.get("n_charts") is None:
+            net = MLP(28 * 28, config["out_dim"])
+            opt = SGD(params=net.parameters(), lr=config["lr"])
+            trainer = TSNETrainer(
+                perplexity=config["perplexity"],
+                data_loader=train_dl,
+                eval_data_loader=val_dl,
+                net=net,
+                opt=opt,
+                use_wandb=True,
+                out_path=wandb.run.dir,
+            )
+        else:
+            net = MfldMLP(28 * 28, config["n_charts"])
+            opt = SGD(params=net.parameters(), lr=config["lr"])
+            trainer = MfldTSNETrainer(
+                perplexity=config["perplexity"],
+                data_loader=train_dl,
+                net=net,
+                opt=opt,
+                reg_loss_weight=config["reg_loss_weight"],
+                q_loss_weight=config["q_loss_weight"],
+                use_wandb=True,
+                out_path=wandb.run.dir,
+            )
 
-    trainer.train(
-        conf["n_epochs"],
-        save_ckpt_freq=conf.get("save_ckpt_freq") or np.infty,
-        eval_freq=conf.get("eval_freq") or np.infty,
-    )
+        trainer.train(
+            config["n_epochs"],
+            save_ckpt_freq=config.get("save_ckpt_freq") or np.infty,
+            eval_freq=config.get("eval_freq") or np.infty,
+        )
 
 
 class TSNELoss:
