@@ -85,9 +85,9 @@ def get_cond_dist_given_perp(min_val, max_val, target, tol, X, max_iters=1000):
     dists = pdist(X, X)
     var2 = None
     N = dists.shape[0]
-    finished = torch.zeros(N, dtype=bool)
-    min_val = min_val * torch.ones(N)
-    max_val = max_val * torch.ones(N)
+    finished = torch.zeros(N, dtype=bool, device=X.device)
+    min_val = min_val * torch.ones(N, device=X.device)
+    max_val = max_val * torch.ones(N, device=X.device)
 
     for _ in range(max_iters):
         if var2 is None:
