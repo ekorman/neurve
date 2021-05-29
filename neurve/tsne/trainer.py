@@ -11,7 +11,7 @@ from neurve.tsne.net import MfldMLP, MLP
 from neurve.tsne.stats import get_cond_dist_given_perp, joint_q, kl_div
 
 
-def run_from_config(config):
+def run_from_config(config=None):
     with wandb.init(config=config):
         config = wandb.config
 
