@@ -160,7 +160,6 @@ class MfldTSNETrainer(Trainer):
                 c=all_labels[all_q.argmax(1) == c],
                 s=5,
             )
-            plt.colorbar()
             wandb.log({f"chart_{c}": wandb.Image(plt)})
 
         fig = plt.figure()
