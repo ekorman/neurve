@@ -48,8 +48,9 @@ class MfldMLP(nn.Module):
         coords = torch.stack([c(x) for c in self.coords], 1)
         q = self.q(x)
 
+        sig_coords = torch.sigmoid(coords)
         embs = torch.stack(
-            [p(coords.select(1, i)) for i, p in enumerate(self.embedding_heads)], 1
+            [p(sig_coords.select(1, i)) for i, p in enumerate(self.embedding_heads)], 1
         )
         embedding = (q.unsqueeze(2) * embs).sum(1)
         return q, coords, embedding
