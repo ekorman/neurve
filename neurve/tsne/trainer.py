@@ -12,6 +12,9 @@ from neurve.tsne.stats import get_cond_dist_given_perp, joint_q, kl_div
 
 
 def run_from_conf(conf):
+    wandb.init(project="tsne")
+    wandb.config.update(conf)
+
     train_dset = FlatMNIST(train=True, download=True, root=conf["data_root"])
     train_dl = DataLoader(train_dset, batch_size=conf["batch_size"])
 
