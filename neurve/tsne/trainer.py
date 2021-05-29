@@ -40,6 +40,7 @@ def run_from_config(config=None):
             trainer = MfldTSNETrainer(
                 perplexity=config["perplexity"],
                 data_loader=train_dl,
+                eval_data_loader=val_dl,
                 net=net,
                 opt=opt,
                 reg_loss_weight=config["reg_loss_weight"],
