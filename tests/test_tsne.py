@@ -1,9 +1,7 @@
-import math
-
 import pytest
 import torch
 
-from neurve.tsne.stats import cond_matrix, find_var2, joint_q, perplexity
+from neurve.tsne.stats import cond_matrix, get_cond_dist_given_perp, joint_q, perplexity
 from neurve.distance import pdist
 
 
@@ -50,15 +48,13 @@ def test_joint_q():
             assert t_dist[i, j].item() == pytest.approx((num / denom).item(), abs=1e-6)
 
 
-def test_find_var2():
+def test_get_cond_dist_given_perp():
     N, d = 50, 64
     target_perp = 15.0
     tol = 1e-4
     X = torch.rand((N, d))
-    dists = pdist(X, X)
-    var2 = find_var2(0, 100, target_perp, tol, dists)
+    cond = get_cond_dist_given_perp(0, 100, target_perp, tol, X)
 
-    cond = cond_matrix(var2=var2, dists=dists)
     p = perplexity(cond)
 
     torch.testing.assert_allclose(p, target_perp)

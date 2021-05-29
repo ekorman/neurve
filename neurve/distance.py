@@ -1,3 +1,5 @@
+import numpy as np
+from scipy import spatial
 import torch
 
 SMALL = 1e-12
@@ -101,7 +103,7 @@ def batch_pdist(X, Y, device=None):
 
 
 def pdist(X, Y):
-    """ Computes all the pairwise distances
+    """ Computes all the squared pairwise distances
 
     Parameters
     ----------
@@ -113,7 +115,7 @@ def pdist(X, Y):
     Returns
     -------
     torch.tensor
-        shape [n, m] of all pairwise distances
+        shape [n, m] of all squared pairwise distances
     """
     n, m = X.shape[0], Y.shape[0]
     X_norm2 = (X ** 2).sum(1)
@@ -152,4 +154,41 @@ def psim(X, Y):
         * (torch.ones((n, 1), device=Y.device) @ Y_norm.unsqueeze(0))
     )
 
+    return ret
+
+
+def nearest_neighbors(X: np.ndarray, n_neighbors: int) -> np.ndarray:
+    """
+    Parameters
+    ----------
+    X
+        array of shape [N, d] of N many d-dimensional vectors
+    n_neighbors
+        number of nearest neighbors to find
+
+    Returns
+    -------
+    np.ndarray
+        shape [N, n_neighbors] giving the indices of the nearest neighbors.
+        Note that this may not be sorted, e.g. the index at [i, 0] may not be
+        the closest neighbor to X[i] but it is among the closest
+        n_neighbors many.
+    """
+    dists = spatial.distance.squareform(spatial.distance.pdist(X))
+    for i in range(dists.shape[0]):
+        dists[i, i] = np.infty
+
+    ret = np.argpartition(dists, n_neighbors, 1)
+    return ret[:, :n_neighbors]
+
+
+def nn_graph(X, n_neighbors) -> np.ndarray:
+    N = X.shape[0]
+    nn = nearest_neighbors(X, n_neighbors)
+    row_ind = [i for i in range(N) for _ in range(n_neighbors)]
+    col_ind = [j for i in range(N) for j in nn[i]]
+    data = [1] * N * n_neighbors
+
+    ret = np.zeros((N, N))
+    ret[row_ind, col_ind] = data
     return ret
