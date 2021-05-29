@@ -152,7 +152,7 @@ class MfldTSNETrainer(Trainer):
             all_labels.extend(y.detach().cpu().numpy().tolist())
 
         all_labels = np.array(all_labels)
-        for c in range(self.n_charts):
+        for c in range(self.net.n_charts):
             coords = all_coords[all_q.argmax(1) == c]
             plt.scatter(
                 coords[:, c, 0],
