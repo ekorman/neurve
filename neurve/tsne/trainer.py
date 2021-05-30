@@ -43,7 +43,7 @@ def run_from_config(config=None):
                 out_path=wandb.run.dir,
             )
         else:
-            net = MfldMLP(28 * 28, config["n_charts"])
+            net = MfldMLP(input_dim, config["n_charts"])
             opt = SGD(params=net.parameters(), lr=config["lr"])
             trainer = MfldTSNETrainer(
                 perplexity=config["perplexity"],
