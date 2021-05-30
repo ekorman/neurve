@@ -10,6 +10,8 @@ setup(
         "torch>=1.3.1",
         "torchvision>=0.4.2",
         "scipy>=1.5.3",
+        "seaborn",
+        "matplotlib",
         "tqdm",
         "tensorboardX",
     ],

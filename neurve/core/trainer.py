@@ -82,6 +82,8 @@ class Trainer(object):
         os.makedirs(out_path, exist_ok=True)
 
     def log_dict(self, d):
+        if d is None:
+            return
         if not self.use_wandb:
             for k, v in d.items():
                 self.writer.add_scalar(k, v, self.global_steps)

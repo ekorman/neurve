@@ -1,32 +1,38 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 from torch.optim import SGD
 from torch.utils.data import DataLoader
 import wandb
 
 from neurve.core import Trainer
 from neurve.mmd import MMDManifoldLoss, q_loss
-from neurve.tsne.dataset import FlatMNIST
+from neurve.tsne.dataset import get_datasets
 from neurve.tsne.net import MfldMLP, MLP
-from neurve.tsne.stats import get_cond_dist_given_perp, joint_q, kl_div
+from neurve.tsne.stats import (
+    get_cond_dist_given_perp,
+    joint_q,
+    kl_div,
+    MaxItersException,
+)
 
 
 def run_from_config(config=None):
-    with wandb.init(config=config):
+    with wandb.init(config=config, project="tsne"):
         config = wandb.config
 
-        train_dset = FlatMNIST(train=True, download=True, root=config["data_root"])
-        train_dl = DataLoader(train_dset, batch_size=config["batch_size"])
-
-        val_dset = FlatMNIST(
-            train=False, download=True, root=config["data_root"], return_labels=True
-        )
+        train_dset, val_dset = get_datasets(config)
+        input_dim = train_dset[0].shape[0]
+        train_dl = DataLoader(train_dset, batch_size=config["batch_size"], shuffle=True)
         val_dl = DataLoader(val_dset, batch_size=config["batch_size"])
+
         if config.get("n_charts") is None:
-            net = MLP(28 * 28, config["out_dim"])
+            net = MLP(input_dim, config["out_dim"])
             opt = SGD(params=net.parameters(), lr=config["lr"])
             trainer = TSNETrainer(
                 perplexity=config["perplexity"],
+                max_var2=config["max_var2"],
+                var2_tol=config["var2_tol"],
                 data_loader=train_dl,
                 eval_data_loader=val_dl,
                 net=net,
@@ -39,6 +45,8 @@ def run_from_config(config=None):
             opt = SGD(params=net.parameters(), lr=config["lr"])
             trainer = MfldTSNETrainer(
                 perplexity=config["perplexity"],
+                max_var2=config["max_var2"],
+                var2_tol=config["var2_tol"],
                 data_loader=train_dl,
                 eval_data_loader=val_dl,
                 net=net,
@@ -57,11 +65,18 @@ def run_from_config(config=None):
 
 
 class TSNELoss:
-    def __init__(self, perplexity):
+    def __init__(self, perplexity, max_var2=10000, var2_tol=1e-3):
         self.perplexity = perplexity
+        self.max_var2 = max_var2
+        self.var2_tol = var2_tol
 
     def __call__(self, X, E):
-        cond_dist = get_cond_dist_given_perp(0, 100, self.perplexity, 1e-4, X)
+        try:
+            cond_dist = get_cond_dist_given_perp(
+                0, self.max_var2, self.perplexity, self.var2_tol, X
+            )
+        except MaxItersException:
+            return None
         P = (cond_dist + cond_dist.T) / (2 * X.shape[0])
         Q = joint_q(E)
 
@@ -69,14 +84,16 @@ class TSNELoss:
 
 
 class TSNETrainer(Trainer):
-    def __init__(self, *args, perplexity, **kwargs):
+    def __init__(self, *args, perplexity, max_var2, var2_tol, **kwargs):
         super().__init__(*args, **kwargs)
-        self.loss = TSNELoss(perplexity)
+        self.loss = TSNELoss(perplexity, max_var2, var2_tol)
 
     def _train_step(self, data):
         data = data.to(self.device)
         E = self.net(data)
         loss = self.loss(data, E)
+        if loss is None:
+            return None
 
         self.opt.zero_grad()
         loss.backward()
@@ -90,12 +107,10 @@ class TSNETrainer(Trainer):
             all_embs = np.concatenate(
                 [all_embs, self.net(x.to(self.device)).detach().cpu().numpy()]
             )
-            all_labels.extend(y.detach().cpu().numpy().tolist())
+            all_labels.extend(y)
 
-        all_labels = np.array(all_labels)
         if self.net.out_dim == 2:
-            plt.scatter(all_embs[:, 0], all_embs[:, 1], c=all_labels, s=5)
-            plt.colorbar()
+            sns.scatterplot(x=all_embs[:, 0], y=all_embs[:, 1], hue=all_labels, s=2)
         else:
             fig = plt.figure()
             ax = fig.add_subplot(projection="3d")
@@ -104,12 +119,22 @@ class TSNETrainer(Trainer):
             )
             fig.colorbar(p)
         wandb.log({"embedding": wandb.Image(plt)})
+        plt.clf()
 
 
 class MfldTSNETrainer(Trainer):
-    def __init__(self, *args, perplexity, reg_loss_weight, q_loss_weight, **kwargs):
+    def __init__(
+        self,
+        *args,
+        perplexity,
+        max_var2,
+        var2_tol,
+        reg_loss_weight,
+        q_loss_weight,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
-        self.tsne_loss = TSNELoss(perplexity)
+        self.tsne_loss = TSNELoss(perplexity, max_var2, var2_tol)
         self.reg_loss = MMDManifoldLoss(kernel="imq", sigma=2 / 6, device=self.device)
         self.reg_loss_weight = reg_loss_weight
         self.q_loss_weight = q_loss_weight
@@ -154,13 +179,14 @@ class MfldTSNETrainer(Trainer):
         all_labels = np.array(all_labels)
         for c in range(self.net.n_charts):
             coords = all_coords[all_q.argmax(1) == c]
-            plt.scatter(
-                coords[:, c, 0],
-                coords[:, c, 1],
-                c=all_labels[all_q.argmax(1) == c],
-                s=5,
+            sns.scatterplot(
+                x=coords[:, c, 0],
+                y=coords[:, c, 1],
+                hue=all_labels[all_q.argmax(1) == c],
+                s=2,
             )
             wandb.log({f"chart_{c}": wandb.Image(plt)})
+            plt.clf()
 
         fig = plt.figure()
         ax = fig.add_subplot(projection="3d")
@@ -169,3 +195,4 @@ class MfldTSNETrainer(Trainer):
         )
         fig.colorbar(p)
         wandb.log({"embedding": wandb.Image(plt)})
+        plt.clf()

@@ -3,6 +3,10 @@ import torch
 from neurve.distance import pdist
 
 
+class MaxItersException(Exception):
+    pass
+
+
 def cond_matrix(var2, X=None, dists=None):
     """
     Parameters
@@ -71,7 +75,7 @@ def kl_div(P, Q):
     return (P * torch.log((P + 1e-10) / (Q + 1e-10))).sum()
 
 
-def get_cond_dist_given_perp(min_val, max_val, target, tol, X, max_iters=1000):
+def get_cond_dist_given_perp(min_val, max_val, target, tol, X, max_iters=100):
     """
     Parameters
     ----------
@@ -106,4 +110,4 @@ def get_cond_dist_given_perp(min_val, max_val, target, tol, X, max_iters=1000):
         max_val = (diff > 0) * var2 + ~(diff > 0) * max_val
         min_val = ~(diff > 0) * var2 + (diff > 0) * min_val
 
-    raise RuntimeError("maximum iterations reached")
+    raise MaxItersException("maximum iterations reached")
