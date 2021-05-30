@@ -16,6 +16,8 @@ from neurve.tsne.stats import (
     MaxItersException,
 )
 
+sns.set(rc={"figure.figsize": (16, 8)})
+
 
 def run_from_config(config=None):
     with wandb.init(config=config, project="tsne"):
