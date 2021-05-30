@@ -146,6 +146,8 @@ class MfldTSNETrainer(Trainer):
         q, coords, E = self.net(data)
 
         tsne_loss = self.tsne_loss(data, E)
+        if tsne_loss is None:
+            return None
         reg_loss = self.reg_loss(q, coords)
         loss = tsne_loss + self.reg_loss_weight * reg_loss
         if self.q_loss_weight != 0:
