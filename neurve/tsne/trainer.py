@@ -190,11 +190,11 @@ class MfldTSNETrainer(Trainer):
             wandb.log({f"chart_{c}": wandb.Image(plt)})
             plt.clf()
 
-        fig = plt.figure()
-        ax = fig.add_subplot(projection="3d")
-        p = ax.scatter(
-            all_embs[:, 0], all_embs[:, 1], all_embs[:, 2], c=all_labels, s=2
-        )
-        fig.colorbar(p)
-        wandb.log({"embedding": wandb.Image(plt)})
-        plt.clf()
+        # fig = plt.figure()
+        # ax = fig.add_subplot(projection="3d")
+        # p = ax.scatter(
+        #     all_embs[:, 0], all_embs[:, 1], all_embs[:, 2], c=all_labels, s=2
+        # )
+        # fig.colorbar(p)
+        # wandb.log({"embedding": wandb.Image(plt)})
+        # plt.clf()
