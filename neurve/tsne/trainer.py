@@ -170,8 +170,8 @@ class MfldTSNETrainer(Trainer):
     def eval(self):
         all_embs, all_coords, all_q, all_labels = (
             np.empty((0, 3)),
-            np.empty((0, self.n_charts, 2)),
-            np.empty((0, self.n_charts)),
+            np.empty((0, self.net.n_charts, 2)),
+            np.empty((0, self.net.n_charts)),
             [],
         )
         for x, y in self.eval_data_loader:
