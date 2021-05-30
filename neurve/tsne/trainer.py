@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
+import torch
 from torch.optim import SGD
 from torch.utils.data import DataLoader
 import wandb
@@ -175,6 +176,7 @@ class MfldTSNETrainer(Trainer):
         )
         for x, y in self.eval_data_loader:
             q, coords, emb = self.net(x.to(self.device))
+            coords = torch.sigmoid(coords)
             all_embs = np.concatenate([all_embs, emb.detach().cpu().numpy()])
             all_coords = np.concatenate([all_coords, coords.detach().cpu().numpy()])
             all_q = np.concatenate([all_q, q.detach().cpu().numpy()])
