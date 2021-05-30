@@ -29,20 +29,15 @@ class MfldMLP(nn.Module):
             nn.ReLU(),
             nn.Linear(64, 64),
             nn.ReLU(),
-            # nn.Linear(64, 64),
-            # nn.ReLU(),
+            nn.Linear(64, 64),
+            nn.ReLU(),
         )
 
         self.coords = nn.ModuleList([nn.Linear(64, 2) for _ in range(n_charts)])
         self.q = nn.Sequential(nn.Linear(64, n_charts), nn.Softmax(1))
 
         self.embedding_heads = nn.ModuleList(
-            [
-                nn.Sequential(
-                    nn.Linear(2, 3, bias=True), nn.ReLU(), nn.Linear(3, 3, bias=True),
-                )
-                for _ in range(n_charts)
-            ]
+            [nn.Linear(2, 3, bias=True) for _ in range(n_charts)]
         )
 
     def forward(self, x):
