@@ -180,6 +180,7 @@ class MfldTSNETrainer(Trainer):
             all_q = np.concatenate([all_q, q.detach().cpu().numpy()])
             all_labels.extend(y)
 
+        all_labels = np.array(all_labels)
         for c in range(self.net.n_charts):
             coords = all_coords[all_q.argmax(1) == c]
             sns.scatterplot(
