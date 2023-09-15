@@ -8,3 +8,4 @@ runs/
 __pycache__/
 wandb/
 models/
+.vscode
