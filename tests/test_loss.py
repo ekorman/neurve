@@ -1,7 +1,7 @@
 import torch
 
 from neurve.distance import psim
-from neurve.unsupervised.loss import SimCLRLoss
+from neurve.contrastive.loss import SimCLRLoss
 
 
 def test_simclr_loss():

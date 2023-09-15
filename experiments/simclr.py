@@ -10,10 +10,10 @@ from torch import optim
 from torch.utils.data import DataLoader, random_split
 
 from neurve.core.models import CoordLinear
-from neurve.unsupervised.models import SimCLR, SimCLRMfld
-from neurve.unsupervised.dataset import SimCLRDataset
+from neurve.contrastive.models import SimCLR, SimCLRMfld
+from neurve.contrastive.dataset import SimCLRDataset
 from neurve.core.trainer import LinearTrainer
-from neurve.unsupervised.trainer import SimCLRTrainer, SimCLRMfldTrainer
+from neurve.contrastive.trainer import SimCLRTrainer, SimCLRMfldTrainer
 
 data_root = "data/"
 

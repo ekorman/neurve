@@ -3,7 +3,7 @@ import torch.nn as nn
 from torchvision import models
 
 from neurve.core.models import load_from_folder
-from neurve.unsupervised.utils import modify_resnet_model
+from neurve.contrastive.utils import modify_resnet_model
 
 
 class SimCLR(nn.Module):
