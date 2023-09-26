@@ -9,3 +9,4 @@ __pycache__/
 wandb/
 models/
 .vscode
+*.egg-info
