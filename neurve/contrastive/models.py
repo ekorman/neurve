@@ -22,7 +22,7 @@ class SimCLR(nn.Module):
         """
         super().__init__()
         self.encoder = modify_resnet_model(
-            getattr(models, backbone)(pretrained=False),
+            getattr(models, backbone)(weights=None),
             in_channels=in_channels,
             dim_z=dim_z,
         )
@@ -67,7 +67,7 @@ class SimCLRMfld(nn.Module):
 
         self.dim_z = dim_z
         self.backbone = modify_resnet_model(
-            getattr(models, backbone)(pretrained=False),
+            getattr(models, backbone)(weights=None),
             in_channels=in_channels,
             dim_z=2048,
         )
