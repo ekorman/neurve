@@ -40,7 +40,9 @@ def load_from_folder(cls, path):
     net.load_state_dict(
         torch.load(
             net_path,
-            map_location=None if torch.cuda.is_available() else torch.device("cpu"),
+            map_location=None
+            if torch.cuda.is_available()
+            else torch.device("cpu"),
         )
     )
     return net.eval()
@@ -50,7 +52,9 @@ class CoordLinear(nn.Module):
     def __init__(self, dim_z, n_charts, out_dim, one_hot_q=True):
         super().__init__()
         self.out_dim = out_dim
-        self.weights = nn.parameter.Parameter(torch.Tensor(n_charts, out_dim, dim_z))
+        self.weights = nn.parameter.Parameter(
+            torch.Tensor(n_charts, out_dim, dim_z)
+        )
         self.biases = nn.parameter.Parameter(torch.Tensor(n_charts, out_dim))
         self.one_hot_q = one_hot_q
 
@@ -82,6 +86,7 @@ class CoordLinear(nn.Module):
         if self.one_hot_q:
             q = F.one_hot(q.argmax(1), q.shape[1])
         ret = (
-            self.weights @ coords.unsqueeze(-1) + self.biases.unsqueeze(0).unsqueeze(-1)
+            self.weights @ coords.unsqueeze(-1)
+            + self.biases.unsqueeze(0).unsqueeze(-1)
         ).squeeze(-1)
         return (q.unsqueeze(-1) * ret).sum(1)

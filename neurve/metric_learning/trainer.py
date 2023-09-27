@@ -38,7 +38,7 @@ class BaseTripletTrainer(Trainer):
         raise NotImplementedError
 
     def log_metrics(self, dists, all_y):
-        """ Logs metrics
+        """Logs metrics
 
         Parameters
         ----------
@@ -61,8 +61,7 @@ class BaseTripletTrainer(Trainer):
         raise NotImplementedError
 
     def eval(self):
-        """ Compute accuracy of nearest neighbor matching
-        """
+        """Compute accuracy of nearest neighbor matching"""
         dists, all_y = self._get_dists_and_targets()
         self.log_metrics(dists, all_y)
 
@@ -117,7 +116,9 @@ class TripletTrainer(BaseTripletTrainer):
                     all_emb = self.net(x.to(self.device)).cpu()
                     all_y = y
                 else:
-                    all_emb = torch.cat([all_emb, self.net(x.to(self.device)).cpu()])
+                    all_emb = torch.cat(
+                        [all_emb, self.net(x.to(self.device)).cpu()]
+                    )
                     all_y = torch.cat([all_y, y])
 
         dists = self.pdist(all_emb).numpy()
@@ -190,7 +191,10 @@ class ManifoldTripletTrainer(BaseTripletTrainer):
 
     def pdist(self, all_q, all_coords):
         return pdist_mfld(
-            all_q.T, all_coords.transpose(0, 1), all_q.T, all_coords.transpose(0, 1)
+            all_q.T,
+            all_coords.transpose(0, 1),
+            all_q.T,
+            all_coords.transpose(0, 1),
         )
 
     def _get_dists_and_targets(self):

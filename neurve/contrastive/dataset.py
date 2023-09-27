@@ -10,7 +10,9 @@ from torchvision.transforms import (
 
 
 class SimCLRDataset(Dataset):
-    def __init__(self, base_dataset, img_size=(32, 32), color_dist_strength=0.5):
+    def __init__(
+        self, base_dataset, img_size=(32, 32), color_dist_strength=0.5
+    ):
         """
         Parameters
         ----------
@@ -30,7 +32,12 @@ class SimCLRDataset(Dataset):
         rnd_color_jitter = RandomApply([color_jitter], p=0.8)
         rnd_gray = RandomGrayscale(p=0.2)
         self.transform = Compose(
-            [RandomResizedCrop(img_size), rnd_color_jitter, rnd_gray, ToTensor()]
+            [
+                RandomResizedCrop(img_size),
+                rnd_color_jitter,
+                rnd_gray,
+                ToTensor(),
+            ]
         )
 
     def __getitem__(self, index):

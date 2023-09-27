@@ -11,7 +11,9 @@ class SimCLRTrainer(Trainer):
         self.loss = SimCLRLoss(tau=tau)
 
     def _train_step(self, data):
-        z1, z2 = self.net(data[0].to(self.device)), self.net(data[1].to(self.device))
+        z1, z2 = self.net(data[0].to(self.device)), self.net(
+            data[1].to(self.device)
+        )
         loss = self.loss(z1, z2)
 
         self.opt.zero_grad()
@@ -23,7 +25,14 @@ class SimCLRTrainer(Trainer):
 
 class SimCLRMfldTrainer(SimCLRTrainer):
     def __init__(
-        self, net, opt, reg_loss_weight, q_loss_weight=0, tau=0.5, *args, **kwargs
+        self,
+        net,
+        opt,
+        reg_loss_weight,
+        q_loss_weight=0,
+        tau=0.5,
+        *args,
+        **kwargs,
     ):
         super().__init__(net, opt, tau, *args, **kwargs)
         self.reg_loss_weight = reg_loss_weight
@@ -39,11 +48,15 @@ class SimCLRMfldTrainer(SimCLRTrainer):
         coords1 = torch.clamp(coords1, -10, 10)
         coords2 = torch.clamp(coords2, -10, 10)
 
-        reg_loss = 0.5 * self.reg_loss(q1, coords1) + 0.5 * self.reg_loss(q2, coords2)
+        reg_loss = 0.5 * self.reg_loss(q1, coords1) + 0.5 * self.reg_loss(
+            q2, coords2
+        )
 
         coords1 = torch.sigmoid(coords1)
         coords2 = torch.sigmoid(coords2)
-        z1, z2 = self.net.proj_head(q1, coords1), self.net.proj_head(q2, coords2)
+        z1, z2 = self.net.proj_head(q1, coords1), self.net.proj_head(
+            q2, coords2
+        )
         simclr_loss = self.loss(z1, z2)
 
         loss = simclr_loss + self.reg_loss_weight * reg_loss

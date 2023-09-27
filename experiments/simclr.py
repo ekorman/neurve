@@ -45,9 +45,11 @@ def main(
     assert val_or_test in ["val", "test"]
 
     out_path = wandb.run.dir if use_wandb else out_path
-    dset_class = {"cifar": CIFAR10, "mnist": MNIST, "fashion_mnist": FashionMNIST}[
-        dataset
-    ]
+    dset_class = {
+        "cifar": CIFAR10,
+        "mnist": MNIST,
+        "fashion_mnist": FashionMNIST,
+    }[dataset]
 
     # get the net
     if n_charts is None:
@@ -88,7 +90,9 @@ def main(
     )
 
     opt_kwargs = {} if weight_decay is None else {"weight_decay": weight_decay}
-    opt = getattr(optim, opt_name)(params=net.parameters(), lr=lr, **opt_kwargs)
+    opt = getattr(optim, opt_name)(
+        params=net.parameters(), lr=lr, **opt_kwargs
+    )
 
     # setup the trainer
     if n_charts is None:
@@ -123,7 +127,9 @@ def main(
         linear_model = CoordLinear(dim_z, n_charts, 10, one_hot_q=True)
 
     linear_opt_kwargs = (
-        {} if linear_weight_decay is None else {"weight_decay": linear_weight_decay}
+        {}
+        if linear_weight_decay is None
+        else {"weight_decay": linear_weight_decay}
     )
     linear_opt = getattr(optim, linear_opt_name)(
         params=linear_model.parameters(), lr=linear_lr, **linear_opt_kwargs
@@ -145,7 +151,10 @@ def main(
         )
 
     linear_train_data_loader = DataLoader(
-        linear_train_dset, batch_size=batch_size, shuffle=True, num_workers=num_workers
+        linear_train_dset,
+        batch_size=batch_size,
+        shuffle=True,
+        num_workers=num_workers,
     )
 
     val_data_loader = DataLoader(
@@ -163,7 +172,9 @@ def main(
         eval_data_loader=val_data_loader,
         use_wandb=use_wandb,
     )
-    trainer.train(n_epochs=n_epochs, save_ckpt_freq=save_ckpt_freq, eval_freq=eval_freq)
+    trainer.train(
+        n_epochs=n_epochs, save_ckpt_freq=save_ckpt_freq, eval_freq=eval_freq
+    )
 
 
 if __name__ == "__main__":

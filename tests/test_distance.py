@@ -4,8 +4,7 @@ from neurve.distance import distmfld, pdist_mfld, psim
 
 
 def test_distmfld_disjoint():
-    """ Test that points that are not in a common chart have distance 1
-    """
+    """Test that points that are not in a common chart have distance 1"""
     q1 = torch.tensor([[1], [0]])
     q2 = torch.tensor([[0], [1]])
     c1, c2 = [torch.rand(2, 1, 3) for _ in range(2)]
@@ -14,8 +13,7 @@ def test_distmfld_disjoint():
 
 
 def test_pdist_mfld():
-    """ Test batch computation of pairwise distances
-    """
+    """Test batch computation of pairwise distances"""
     nc, m, n, d = 4, 5, 6, 7
     q1 = torch.softmax(torch.rand(nc, m), 0)
     q2 = torch.softmax(torch.rand(nc, n), 0)
@@ -37,8 +35,7 @@ def test_pdist_mfld():
 
 
 def test_psim():
-    """ Test batch computation of pairwise cosine similarities
-    """
+    """Test batch computation of pairwise cosine similarities"""
     m, n, d = 10, 12, 7
     X, Y = torch.rand(m, d), torch.rand(n, d)
     sims = psim(X, Y)

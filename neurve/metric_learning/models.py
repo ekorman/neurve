@@ -27,7 +27,9 @@ class TorchvisionMfldEmbed(nn.Module):
         """
         super().__init__()
         self.backbone = getattr(models, backbone)(*args, **kwargs)
-        self.coords = nn.ModuleList([nn.Linear(1000, dim_z) for _ in range(n_charts)])
+        self.coords = nn.ModuleList(
+            [nn.Linear(1000, dim_z) for _ in range(n_charts)]
+        )
         self.q = nn.Sequential(nn.Linear(1000, n_charts), nn.Softmax(1))
 
     def forward(self, x):

@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 
 
 def summary_string(losses_dict, epoch, n_epochs):
-    """ Summary string for progress bar
+    """Summary string for progress bar
 
     Parameters
     ----------
@@ -95,7 +95,7 @@ class Trainer(object):
         eval_freq=np.infty,
         n_global_steps=None,
     ):
-        """ Method for training. Saves tensorboard output to self.out_path and
+        """Method for training. Saves tensorboard output to self.out_path and
         net and optimizer checkpoints to self.out_path.
 
 
@@ -123,7 +123,9 @@ class Trainer(object):
                 if ret_dict is None:
                     continue
                 self.log_dict(ret_dict)
-                train_bar.set_description_str(summary_string(ret_dict, epoch, n_epochs))
+                train_bar.set_description_str(
+                    summary_string(ret_dict, epoch, n_epochs)
+                )
 
             if epoch % save_ckpt_freq == 0:
                 tqdm.write(f"Saving checkpoint at step {self.global_steps}")
@@ -142,10 +144,12 @@ class Trainer(object):
         else:
             sd = self.net.state_dict()
         torch.save(
-            sd, os.path.join(self.out_path, f"{self.net_name}_{suffix}.pth"),
+            sd,
+            os.path.join(self.out_path, f"{self.net_name}_{suffix}.pth"),
         )
         torch.save(
-            self.opt.state_dict(), os.path.join(self.out_path, f"opt_{suffix}.pth"),
+            self.opt.state_dict(),
+            os.path.join(self.out_path, f"opt_{suffix}.pth"),
         )
 
     def _train_step(self, data):
@@ -207,6 +211,8 @@ class LinearTrainer(Trainer):
                 preds = self.linear_model(*encoded).argmax(1).detach().tolist()
                 all_preds.extend(preds)
                 all_labels.extend(y.tolist())
-        acc = (np.array(all_preds) == np.array(all_labels)).sum() / len(all_preds)
+        acc = (np.array(all_preds) == np.array(all_labels)).sum() / len(
+            all_preds
+        )
         print(f"Validation accuracy: {acc}")
         self.log_dict({"val/accuracy": acc})

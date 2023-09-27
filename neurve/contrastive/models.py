@@ -7,7 +7,9 @@ from neurve.contrastive.utils import modify_resnet_model
 
 
 class SimCLR(nn.Module):
-    def __init__(self, in_channels, backbone="resnet50", dim_z=2048, proj_dim=128):
+    def __init__(
+        self, in_channels, backbone="resnet50", dim_z=2048, proj_dim=128
+    ):
         """
         Parameters
         ----------
@@ -34,13 +36,11 @@ class SimCLR(nn.Module):
         )
 
     def encode(self, x):
-        """encodes the input tensor x
-        """
+        """encodes the input tensor x"""
         return self.encoder(x)
 
     def forward(self, x):
-        """does the composition of encoding followed by the projection head
-        """
+        """does the composition of encoding followed by the projection head"""
         emb = self.encoder(x)
         return self.proj_head(emb)
 
@@ -72,7 +72,9 @@ class SimCLRMfld(nn.Module):
             dim_z=2048,
         )
 
-        self.coords = nn.ModuleList([nn.Linear(2048, dim_z) for _ in range(n_charts)])
+        self.coords = nn.ModuleList(
+            [nn.Linear(2048, dim_z) for _ in range(n_charts)]
+        )
         self.q = nn.Sequential(nn.Linear(2048, n_charts), nn.Softmax(1))
 
         self.proj_heads = nn.ModuleList(
@@ -87,8 +89,7 @@ class SimCLRMfld(nn.Module):
         )
 
     def encode(self, x):
-        """encodes the input tensor x
-        """
+        """encodes the input tensor x"""
         x = self.backbone(x)
         coords = torch.stack([c(x) for c in self.coords], 1)
         q = self.q(x)
@@ -102,8 +103,7 @@ class SimCLRMfld(nn.Module):
         return (q.unsqueeze(2) * proj_comps).sum(1)
 
     def forward(self, x):
-        """does the composition of encoding followed by the projection head
-        """
+        """does the composition of encoding followed by the projection head"""
         q, coords = self.encode(x)
 
         return self.proj_head(q, coords)
