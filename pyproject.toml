@@ -16,6 +16,7 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest"]
 wandb = ["wandb"]
+dev = ["pre-commit"]
 
 [build-system]
 requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
