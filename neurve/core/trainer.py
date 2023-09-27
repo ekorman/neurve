@@ -1,8 +1,8 @@
 import os
 
 import numpy as np
-from tensorboardX import SummaryWriter
 import torch
+from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
 try:

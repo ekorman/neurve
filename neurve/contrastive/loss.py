@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-
 from neurve.distance import psim
 
 LARGE = 1e9

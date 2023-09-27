@@ -1,9 +1,9 @@
 from torch.utils.data import Dataset
 from torchvision.transforms import (
     ColorJitter,
+    Compose,
     RandomApply,
     RandomGrayscale,
-    Compose,
     RandomResizedCrop,
     ToTensor,
 )

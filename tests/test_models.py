@@ -1,7 +1,6 @@
 import torch
-
-from neurve.core.models import CoordLinear
 from neurve.contrastive.models import SimCLRMfld
+from neurve.core.models import CoordLinear
 
 
 def test_simclrmfld():

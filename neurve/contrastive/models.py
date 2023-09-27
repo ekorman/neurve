@@ -1,9 +1,8 @@
 import torch
 import torch.nn as nn
-from torchvision import models
-
-from neurve.core.models import load_from_folder
 from neurve.contrastive.utils import modify_resnet_model
+from neurve.core.models import load_from_folder
+from torchvision import models
 
 
 class SimCLR(nn.Module):

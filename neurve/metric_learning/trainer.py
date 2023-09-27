@@ -1,13 +1,12 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
-from tqdm import tqdm
-
 from neurve.core import Trainer
 from neurve.distance import pdist, pdist_mfld
-from neurve.mmd import MMDManifoldLoss, q_loss
 from neurve.metric_learning.loss import ManifoldTripletLoss, TripletLoss
 from neurve.metric_learning.metrics import retrieval_metrics
+from neurve.mmd import MMDManifoldLoss, q_loss
+from tqdm import tqdm
 
 
 class BaseTripletTrainer(Trainer):

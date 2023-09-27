@@ -1,5 +1,4 @@
 import numpy as np
-
 from neurve.metric_learning.metrics import retrieval_metrics
 
 

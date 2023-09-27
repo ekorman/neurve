@@ -1,8 +1,7 @@
 import torch
-
+from neurve.contrastive.loss import SimCLRLoss
 from neurve.core import Trainer
 from neurve.mmd import MMDManifoldLoss, q_loss
-from neurve.contrastive.loss import SimCLRLoss
 
 
 class SimCLRTrainer(Trainer):

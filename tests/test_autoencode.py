@@ -1,5 +1,4 @@
 import torch
-
 from neurve.autoencode.model import VectorAutoencoder
 
 

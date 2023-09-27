@@ -1,9 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torchvision import models
-
 from neurve.core.models import load_from_folder
+from torchvision import models
 
 
 class TorchvisionEmbed(nn.Module):

@@ -1,28 +1,27 @@
 import argparse
-from copy import copy
 import os
+from copy import copy
 
 import numpy as np
-from torch import optim
-from torch.utils.data import DataLoader, Subset
-from torchvision.datasets import ImageFolder
-from torchvision.transforms import (
-    ToTensor,
-    Compose,
-    Resize,
-    Normalize,
-    RandomResizedCrop,
-    RandomHorizontalFlip,
-)
-
 from neurve.metric_learning.models import (
     TorchvisionEmbed,
     TorchvisionMfldEmbed,
 )
-from neurve.samplers import BalancedClassBatchSampler
 from neurve.metric_learning.trainer import (
     ManifoldTripletTrainer,
     TripletTrainer,
+)
+from neurve.samplers import BalancedClassBatchSampler
+from torch import optim
+from torch.utils.data import DataLoader, Subset
+from torchvision.datasets import ImageFolder
+from torchvision.transforms import (
+    Compose,
+    Normalize,
+    RandomHorizontalFlip,
+    RandomResizedCrop,
+    Resize,
+    ToTensor,
 )
 
 

@@ -1,19 +1,18 @@
 import argparse
-from copy import copy
 import logging
 import os
+from copy import copy
 
-from torchvision.datasets import FashionMNIST, MNIST, CIFAR10
-from torchvision.transforms import ToTensor
 import torch
+from neurve.contrastive.dataset import SimCLRDataset
+from neurve.contrastive.models import SimCLR, SimCLRMfld
+from neurve.contrastive.trainer import SimCLRMfldTrainer, SimCLRTrainer
+from neurve.core.models import CoordLinear
+from neurve.core.trainer import LinearTrainer
 from torch import optim
 from torch.utils.data import DataLoader, random_split
-
-from neurve.core.models import CoordLinear
-from neurve.contrastive.models import SimCLR, SimCLRMfld
-from neurve.contrastive.dataset import SimCLRDataset
-from neurve.core.trainer import LinearTrainer
-from neurve.contrastive.trainer import SimCLRTrainer, SimCLRMfldTrainer
+from torchvision.datasets import CIFAR10, MNIST, FashionMNIST
+from torchvision.transforms import ToTensor
 
 data_root = "data/"
 
