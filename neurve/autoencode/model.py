@@ -5,7 +5,9 @@ import torch.nn as nn
 def create_basic_layer(
     in_dim: int, out_dim: int, use_batch_norm: bool
 ) -> nn.Module:
-    layers = [nn.Linear(in_dim, out_dim), nn.ReLU(), nn.BatchNorm1d(out_dim)]
+    layers = [nn.Linear(in_dim, out_dim), nn.ReLU()]
+    if use_batch_norm:
+        layers.append(nn.BatchNorm1d(out_dim))
     return nn.Sequential(*layers)
 
 
