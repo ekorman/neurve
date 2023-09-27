@@ -1,7 +1,6 @@
 import torch
-
-from neurve.distance import psim
 from neurve.contrastive.loss import SimCLRLoss
+from neurve.distance import psim
 
 
 def test_simclr_loss():
@@ -28,4 +27,4 @@ def test_simclr_loss():
         loss += ell(2 * k + 1, 2 * k) + ell(2 * k, 2 * k + 1)
     loss /= 2 * N
 
-    torch.testing.assert_allclose(loss, sim_clr_loss(z1, z2))
+    torch.testing.assert_close(loss, sim_clr_loss(z1, z2))

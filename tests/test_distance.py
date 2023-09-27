@@ -1,5 +1,4 @@
 import torch
-
 from neurve.distance import distmfld, pdist_mfld, psim
 
 
@@ -23,7 +22,7 @@ def test_pdist_mfld():
     pdist = pdist_mfld(q1, c1, q2, c2)
     for i in range(m):
         for j in range(n):
-            torch.testing.assert_allclose(
+            torch.testing.assert_close(
                 pdist[i, j],
                 distmfld(
                     q1[:, i : i + 1],
@@ -41,6 +40,6 @@ def test_psim():
     sims = psim(X, Y)
     for i, x in enumerate(X):
         for j, y in enumerate(Y):
-            torch.testing.assert_allclose(
+            torch.testing.assert_close(
                 torch.dot(x, y) / (torch.norm(x) * torch.norm(y)), sims[i, j]
             )
