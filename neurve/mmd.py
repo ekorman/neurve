@@ -1,5 +1,4 @@
 import torch
-
 from neurve.distance import batch_pdist, pdist
 
 
@@ -9,7 +8,7 @@ def sigmoid_inv(x):
 
 def rbf(X, Y, sigma, batch=False):
     d = batch_pdist if batch else pdist
-    return torch.exp(-d(X, Y) / 2 / sigma ** 2)
+    return torch.exp(-d(X, Y) / 2 / sigma**2)
 
 
 def imq(X, Y, C, batch=False):
@@ -35,7 +34,7 @@ class MMD:
         self.k = lambda X, Y: k(X, Y, sigma)
 
     def __call__(self, X, Y):
-        """ Computes the MMD between samples
+        """Computes the MMD between samples
 
         x : [N, d]
         """
@@ -44,7 +43,7 @@ class MMD:
 
         ret = (self.k(X, X).sum() - n) / (n * (n - 1))
         ret += (self.k(Y, Y).sum() - n) / (n * (n - 1))
-        ret += -2 * self.k(X, Y).sum() / n ** 2
+        ret += -2 * self.k(X, Y).sum() / n**2
         return ret
 
 
@@ -55,7 +54,7 @@ class MMDManifold:
         self.k = lambda X, Y: k(X, Y, sigma, batch=True)
 
     def __call__(self, q, X, Y):
-        """ X is the encoder over the data distribution,
+        """X is the encoder over the data distribution,
         q is the coordinate probabilities for X,
         and Y is sampled from the ambient distribution
 
@@ -76,10 +75,12 @@ class MMDManifold:
         qq = q.unsqueeze(2) * q.unsqueeze(1)  # shape [nc, N, N]
 
         ret = (
-            self.k(X, X) * qq * (1 - torch.eye(n, device=q.device).unsqueeze(0))
+            self.k(X, X)
+            * qq
+            * (1 - torch.eye(n, device=q.device).unsqueeze(0))
         ).sum() / (n * (n - 1))
         ret += (self.k(Y, Y).sum() - n) / (nc * n * (n - 1))
-        ret += -2 * (q.unsqueeze(2) * self.k(X, Y)).sum() / (nc * n ** 2)
+        ret += -2 * (q.unsqueeze(2) * self.k(X, Y)).sum() / (nc * n**2)
         return ret
 
 
@@ -117,5 +118,7 @@ class MMDManifoldLoss:
         return self.mmd(
             q.T,
             X.transpose(0, 1),
-            sigmoid_inv(torch.rand(X.shape[0], X.shape[2], device=self.device)),
+            sigmoid_inv(
+                torch.rand(X.shape[0], X.shape[2], device=self.device)
+            ),
         )

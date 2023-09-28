@@ -1,25 +1,27 @@
 import argparse
-from copy import copy
 import os
+from copy import copy
 
 import numpy as np
+from neurve.metric_learning.models import (
+    TorchvisionEmbed,
+    TorchvisionMfldEmbed,
+)
+from neurve.metric_learning.trainer import (
+    ManifoldTripletTrainer,
+    TripletTrainer,
+)
+from neurve.samplers import BalancedClassBatchSampler
 from torch import optim
 from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import ImageFolder
 from torchvision.transforms import (
-    ToTensor,
     Compose,
-    Resize,
     Normalize,
-    RandomResizedCrop,
     RandomHorizontalFlip,
-)
-
-from neurve.metric_learning.models import TorchvisionEmbed, TorchvisionMfldEmbed
-from neurve.samplers import BalancedClassBatchSampler
-from neurve.metric_learning.trainer import (
-    ManifoldTripletTrainer,
-    TripletTrainer,
+    RandomResizedCrop,
+    Resize,
+    ToTensor,
 )
 
 
@@ -94,7 +96,9 @@ def main(
             for i in range(len(train_dset))
             if train_dset.samples[i][1] < len(os.listdir(data_root)) / 2
         ]
-        val_indices = [i for i in range(len(train_dset)) if i not in train_indices]
+        val_indices = [
+            i for i in range(len(train_dset)) if i not in train_indices
+        ]
 
     train_dset = Subset(train_dset, train_indices)
     train_dset.targets = [targets[i] for i in train_indices]
@@ -103,18 +107,24 @@ def main(
 
     if data_root == "data/CUB_200_2011/images/":
         assert (
-            len(np.unique(train_dset.targets)) + len(np.unique(val_dset.targets)) == 100
+            len(np.unique(train_dset.targets))
+            + len(np.unique(val_dset.targets))
+            == 100
             if val_or_test == "val"
             else 200
         )
     else:
         assert (
-            len(np.unique(train_dset.targets)) + len(np.unique(val_dset.targets)) == 98
+            len(np.unique(train_dset.targets))
+            + len(np.unique(val_dset.targets))
+            == 98
             if val_or_test == "val"
             else 196
         )
 
-    batch_sampler = BalancedClassBatchSampler(train_dset, n_classes, n_per_class)
+    batch_sampler = BalancedClassBatchSampler(
+        train_dset, n_classes, n_per_class
+    )
 
     opt = getattr(optim, opt_name)(params=net.parameters(), lr=lr)
 
@@ -150,13 +160,17 @@ def main(
             use_wandb=use_wandb,
         )
 
-    trainer.train(n_epochs=n_epochs, save_ckpt_freq=save_ckpt_freq, eval_freq=eval_freq)
+    trainer.train(
+        n_epochs=n_epochs, save_ckpt_freq=save_ckpt_freq, eval_freq=eval_freq
+    )
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--backbone", type=str, default="googlenet")
-    parser.add_argument("--data_root", type=str, default="data/CUB_200_2011/images/")
+    parser.add_argument(
+        "--data_root", type=str, default="data/CUB_200_2011/images/"
+    )
     parser.add_argument("--dim_z", type=int, default=8)
     parser.add_argument("--eval_freq", type=int, default=20)
     parser.add_argument("--lr", type=float, default=1e-5)

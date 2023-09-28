@@ -4,7 +4,7 @@ SMALL = 1e-12
 
 
 def distmfld(q1, c1, q2, c2):
-    """ Computes (batchwise) the distance between two batches of points in a
+    """Computes (batchwise) the distance between two batches of points in a
     manifold.
 
     Parameters
@@ -30,9 +30,9 @@ def distmfld(q1, c1, q2, c2):
         defined by q1[:, i], c1[:, i, :] and the point q2[:, i], c2[:, i, :]
     """
     q1q2_sum = (q1 * q2).sum(0)
-    return ((q1 * q2 * ((c1 - c2) ** 2).mean(2)).sum(0) / q1q2_sum).masked_fill(
-        q1q2_sum == 0, 1
-    )
+    return (
+        (q1 * q2 * ((c1 - c2) ** 2).mean(2)).sum(0) / q1q2_sum
+    ).masked_fill(q1q2_sum == 0, 1)
 
 
 def pdist_mfld(q1, c1, q2, c2):
@@ -55,8 +55,12 @@ def pdist_mfld(q1, c1, q2, c2):
     """
     nc, m, d = c1.shape
     _, n = q2.shape
-    x1_norm2 = (c1 ** 2).sum(2).unsqueeze(2) @ torch.ones((nc, 1, n), device=c1.device)
-    x2_norm2 = torch.ones((nc, m, 1), device=c1.device) @ (c2 ** 2).sum(2).unsqueeze(1)
+    x1_norm2 = (c1**2).sum(2).unsqueeze(2) @ torch.ones(
+        (nc, 1, n), device=c1.device
+    )
+    x2_norm2 = torch.ones((nc, m, 1), device=c1.device) @ (c2**2).sum(
+        2
+    ).unsqueeze(1)
     x1_dot_x2 = c1 @ c2.transpose(1, 2)
 
     q1q2_sum = q1.T @ q2
@@ -69,7 +73,7 @@ def pdist_mfld(q1, c1, q2, c2):
 
 
 def batch_pdist(X, Y, device=None):
-    """ Computes all the pairwise distances.
+    """Computes all the pairwise distances.
 
     Parameters
     ----------
@@ -89,19 +93,23 @@ def batch_pdist(X, Y, device=None):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     c = X.shape[0]
     n, m = X.shape[1], Y.shape[1]
-    X_norm2 = (X ** 2).sum(2)
-    Y_norm2 = (Y ** 2).sum(2)
+    X_norm2 = (X**2).sum(2)
+    Y_norm2 = (Y**2).sum(2)
     X_dot_Y = torch.matmul(X, Y.transpose(1, 2))
 
     return (
-        torch.matmul(X_norm2.unsqueeze(2), torch.ones((c, 1, m), device=device))
+        torch.matmul(
+            X_norm2.unsqueeze(2), torch.ones((c, 1, m), device=device)
+        )
         - 2 * X_dot_Y
-        + torch.matmul(torch.ones((c, n, 1), device=device), Y_norm2.unsqueeze(1))
+        + torch.matmul(
+            torch.ones((c, n, 1), device=device), Y_norm2.unsqueeze(1)
+        )
     )
 
 
 def pdist(X, Y):
-    """ Computes all the pairwise distances
+    """Computes all the pairwise distances
 
     Parameters
     ----------
@@ -116,8 +124,8 @@ def pdist(X, Y):
         shape [n, m] of all pairwise distances
     """
     n, m = X.shape[0], Y.shape[0]
-    X_norm2 = (X ** 2).sum(1)
-    Y_norm2 = (Y ** 2).sum(1)
+    X_norm2 = (X**2).sum(1)
+    Y_norm2 = (Y**2).sum(1)
     X_dot_Y = X @ Y.T
 
     return (
@@ -128,7 +136,7 @@ def pdist(X, Y):
 
 
 def psim(X, Y):
-    """ Computes all the pairwise similarities
+    """Computes all the pairwise similarities
 
     Parameters
     ----------
@@ -143,8 +151,8 @@ def psim(X, Y):
         shape [n, m] of all pairwise similarities
     """
     n, m = X.shape[0], Y.shape[0]
-    X_norm = ((X ** 2).sum(1) + SMALL).sqrt()
-    Y_norm = ((Y ** 2).sum(1) + SMALL).sqrt()
+    X_norm = ((X**2).sum(1) + SMALL).sqrt()
+    Y_norm = ((Y**2).sum(1) + SMALL).sqrt()
     X_dot_Y = X @ Y.T
 
     ret = X_dot_Y / (

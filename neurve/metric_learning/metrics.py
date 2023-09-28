@@ -2,7 +2,7 @@ import numpy as np
 
 
 def map_score(q, a):
-    """ Mean average precision for a retrieval task
+    """Mean average precision for a retrieval task
 
     Parameters
     ----------
@@ -20,13 +20,15 @@ def map_score(q, a):
     tot_hits[tot_hits == 0] = 1
 
     aps = (
-        indicator.cumsum(1) * indicator / np.arange(1, a.shape[1] + 1).reshape(1, -1)
+        indicator.cumsum(1)
+        * indicator
+        / np.arange(1, a.shape[1] + 1).reshape(1, -1)
     ).sum(1) / tot_hits
     return aps.mean()
 
 
 def recall(q, a):
-    """ Recall average precision for a retrieval task
+    """Recall average precision for a retrieval task
 
     Parameters
     ----------
@@ -43,7 +45,7 @@ def recall(q, a):
 
 
 def retrieval_metrics(q, a, ranks=(1, 2, 4, 8)):
-    """ Average precision for a retrieval task
+    """Average precision for a retrieval task
 
     Parameters
     ----------
