@@ -1,5 +1,7 @@
+import numpy as np
 import torch
 
+from neurve.nn_encoder.dataset import NNDataset
 from neurve.nn_encoder.loss import loss, loss_at_a_point
 from neurve.nn_encoder.models import MfldEncoder
 
@@ -85,3 +87,19 @@ def test_loss():
 
     for k, v in loss_dict.items():
         assert v.allclose(batch_loss_dict[k])
+
+
+def test_dataset():
+    data = np.random.rand(15, 2)
+    dset = NNDataset(data=data, n_neighbors=4)
+
+    assert len(dset) == 15
+    pt, nbrs, non_nbrs = dset[2]
+    assert np.array_equal(pt, data[2])
+    assert nbrs.shape == (4, 2)
+    assert non_nbrs.shape == (4, 2)
+
+    nbr_dists = np.linalg.norm(nbrs - pt, axis=1)
+    non_nbr_dists = np.linalg.norm(non_nbrs - pt, axis=1)
+
+    assert nbr_dists.max() < non_nbr_dists.min()
