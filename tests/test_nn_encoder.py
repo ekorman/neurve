@@ -1,5 +1,6 @@
 import torch
 
+from neurve.nn_encoder.loss import loss, loss_at_a_point
 from neurve.nn_encoder.models import MfldEncoder
 
 
@@ -27,3 +28,60 @@ def test_mfld_encoder():
     assert q.max() <= 1
     assert q.min() >= 0
     assert q.sum(1).allclose(torch.ones(batch))
+
+
+def test_loss():
+    n = 8
+    z = 2
+    n_charts = 3
+    n_neighbors = 4
+    n_non_neighbors = 5
+
+    point = torch.rand(n)
+    neighbors = torch.rand(n_neighbors, n)
+    q_point = torch.rand(n_charts)
+    q_neighbors = torch.rand(n_neighbors, n_charts)
+    q_non_neighbors = torch.rand(n_non_neighbors, n_charts)
+    coords_point = torch.rand(n_charts, z)
+    coords_neighbors = torch.rand(n_neighbors, n_charts, z)
+    coords_non_neighbors = torch.rand(n_non_neighbors, n_charts, z)
+    scale = torch.Tensor([0.75])
+    c = 0.1
+
+    loss_dict = loss_at_a_point(
+        point=point,
+        neighbors=neighbors,
+        q_point=q_point,
+        q_neighbors=q_neighbors,
+        q_non_neighbors=q_non_neighbors,
+        coords_point=coords_point,
+        coords_neighbors=coords_neighbors,
+        coords_non_neighbors=coords_non_neighbors,
+        scale=scale,
+        c=c,
+    )
+
+    assert set(loss_dict.keys()) == {
+        "loss_neighbors",
+        "loss_non_neighbors",
+        "loss",
+    }
+
+    def _double(x):
+        return torch.stack([x, x])
+
+    batch_loss_dict = loss(
+        point=_double(point),
+        neighbors=_double(neighbors),
+        q_point=_double(q_point),
+        q_neighbors=_double(q_neighbors),
+        q_non_neighbors=_double(q_non_neighbors),
+        coords_point=_double(coords_point),
+        coords_neighbors=_double(coords_neighbors),
+        coords_non_neighbors=_double(coords_non_neighbors),
+        scale=scale,
+        c=c,
+    )
+
+    for k, v in loss_dict.items():
+        assert v.allclose(batch_loss_dict[k])
