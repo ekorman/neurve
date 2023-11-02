@@ -112,6 +112,7 @@ def test_dataset(dataset: NNDataset):
 
 def test_trainer(net: MfldEncoder, dataset: NNDataset):
     batch_size = 2
+    n_epochs = 2
     opt = torch.optim.Adam(net.parameters())
     data_loader = torch.utils.data.DataLoader(
         dataset, batch_size=batch_size, drop_last=True
@@ -128,9 +129,9 @@ def test_trainer(net: MfldEncoder, dataset: NNDataset):
         c=c,
     )
 
-    trainer.train(n_epochs=2)
+    trainer.train(n_epochs=n_epochs)
 
-    assert trainer.global_steps == 2 * (len(dataset.data) // batch_size)
+    assert trainer.global_steps == n_epochs * (len(dataset.data) // batch_size)
 
     final_weights = list(net.parameters())
 
