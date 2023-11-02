@@ -43,4 +43,8 @@ class NNDataset(Dataset):
         neighbors = self.data[self.indices[index][: self.n_neighbors]]
         non_neighbors = self.data[self.sample_non_neighbor(index)]
 
-        return point, neighbors, non_neighbors
+        return (
+            point.astype(np.float32),
+            neighbors.astype(np.float32),
+            non_neighbors.astype(np.float32),
+        )

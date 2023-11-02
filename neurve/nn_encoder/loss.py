@@ -64,9 +64,9 @@ def loss_at_a_point(
     ).sum()
 
     # encourage non neighbors to be further than neighbors
-    loss_non_neighbors = -(
-        latent_non_neighbors_dist2 - latent_neighbors_dist2.max()
-    )
+    loss_non_neighbors = (
+        -(latent_non_neighbors_dist2 - latent_neighbors_dist2.max())
+    ).sum()
 
     return {
         "loss_neighbors": loss_neighbors,

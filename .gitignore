@@ -10,3 +10,4 @@ wandb/
 models/
 .vscode
 *.egg-info
+*tfevents*
