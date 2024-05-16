@@ -11,3 +11,4 @@ models/
 .vscode
 *.egg-info
 events.out.tfevents*
+build/*
