@@ -1,6 +1,6 @@
 [project]
 name = "neurve"
-version = "0.1.0"
+dynamic = ["version"]
 description = "atlas learning"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -16,7 +16,7 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest"]
 wandb = ["wandb"]
-dev = ["pre-commit"]
+dev = ["setuptools_scm", "pre-commit"]
 
 [build-system]
 requires = ["setuptools>=61.0", "setuptools_scm[toml]>=6.2"]
@@ -24,6 +24,8 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
 packages = ["neurve"]
+
+[tool.setuptools_scm]
 
 [tool.black]
 line-length = 79
