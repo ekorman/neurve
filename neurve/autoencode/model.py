@@ -102,7 +102,7 @@ class MfldDecoder(nn.Module):
         return x
 
 
-class VectorAutoencoder(nn.Module):
+class MfldAutoencoder(nn.Module):
     def __init__(
         self,
         n: int,

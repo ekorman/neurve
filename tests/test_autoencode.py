@@ -1,11 +1,11 @@
 import torch
-from neurve.autoencode.model import VectorAutoencoder
+from neurve.autoencode.model import MfldAutoencoder
 
 
 def test_vector_autoencoder():
     n, z, backbone_dim, hidden_dim, n_charts = 10, 2, 3, 4, 5
 
-    model = VectorAutoencoder(
+    model = MfldAutoencoder(
         n=n,
         z=z,
         backbone_dim=backbone_dim,
