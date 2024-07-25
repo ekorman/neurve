@@ -12,3 +12,10 @@ models/
 *.egg-info
 events.out.tfevents*
 build/*
+*.pth
+notebooks/neurve/data
+.DS_Store
+*.json
+*.tar.gz
+*.hdf5
+dist
