@@ -91,8 +91,8 @@ class Trainer(object):
     def train(
         self,
         n_epochs=None,
-        save_ckpt_freq=np.infty,
-        eval_freq=np.infty,
+        save_ckpt_freq=np.inf,
+        eval_freq=np.inf,
         n_global_steps=None,
     ):
         """Method for training. Saves tensorboard output to self.out_path and

@@ -45,7 +45,7 @@ class BaseTripletTrainer(Trainer):
         all_y : np.ndarray
         """
         all_y = np.ones((dists.shape[0], 1)) @ all_y.reshape(1, -1)
-        np.fill_diagonal(dists, np.infty)
+        np.fill_diagonal(dists, np.inf)
         sorted_indices = np.argsort(dists)
 
         # sort dists and labels by distance
